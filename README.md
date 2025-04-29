@@ -1,8 +1,7 @@
 # LearnSphere – FullStack Networking Programming Project (with AI-powered Features)
 
 Django mini social-learning platform with course hierarchy and AI-powered features.  
-> Developed by **Taylan Özveren** – for Networking Programming and Web Programming courses.
-
+> Developed by **Taylan Özveren** 
 ---
 
 ## 🔍 Vision
