@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+  <h2>{% if post %}Edit Post{% else %}Add Post to {{ course.title }}{% endif %}</h2>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button class="btn btn-success">{% if post %}Update{% else %}Submit{% endif %}</button>
+    <a href="{% if post %}{% url 'post_detail' post.slug %}{% else %}{% url 'course_detail' course.slug %}{% endif %}" class="btn btn-secondary ms-2">Cancel</a>
+  </form>
+</div>
+{% endblock %}

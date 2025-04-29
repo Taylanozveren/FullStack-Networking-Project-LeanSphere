@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h2 class="mb-4">Courses</h2>
+  {% for d in disciplines %}
+    <div class="mb-3">
+      <h4>{{ d.name }}</h4>
+      <ul class="list-group">
+        {% for c in d.course_set.all %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <a href="{% url 'course_detail' c.slug %}">{{ c.code }} – {{ c.title }}</a>
+            {% if c in user.profile.joined_courses.all %}
+              <span class="badge bg-success">Joined</span>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% empty %}
+    <p>No disciplines found.</p>
+  {% endfor %}
+{% endblock %}

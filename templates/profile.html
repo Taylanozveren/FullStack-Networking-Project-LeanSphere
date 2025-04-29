@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2>
+    {{ profile.user.username }}’in Profili
+    <a href="{% url 'edit_profile' %}" class="btn btn-sm btn-outline-primary float-end">Edit</a>
+  </h2>
+  <div class="row mt-3">
+    <div class="col-md-3">
+      <img src="{{ profile.avatar.url }}" class="img-fluid rounded-circle" alt="Avatar">
+    </div>
+    <div class="col-md-9">
+      <p><strong>Bio:</strong> {{ profile.bio|default:"Henüz bio eklenmemiş." }}</p>
+      <h5>Katıldığı Dersler:</h5>
+      <ul>
+        {% for course in joined_courses %}
+          <li>
+            <a href="{% url 'course_detail' course.slug %}">
+              {{ course.code }} – {{ course.title }}
+            </a>
+          </li>
+        {% empty %}
+          <li>Henüz ders eklemediniz.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block content %}
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>{{ course.code }} – {{ course.title }}</h2>
+    <div>
+      {% if is_joined %}
+        <a href="{% url 'create_post' course.slug %}" class="btn btn-primary me-2">Add Post</a>
+        <form action="{% url 'join_course' course.slug %}" method="post" style="display:inline;">
+          {% csrf_token %}
+          <button class="btn btn-outline-danger">Leave</button>
+        </form>
+      {% else %}
+        <form action="{% url 'join_course' course.slug %}" method="post" style="display:inline;">
+          {% csrf_token %}
+          <button class="btn btn-outline-success">Join</button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+  <p>{{ course.description }}</p>
+  <hr>
+  <h4>Posts</h4>
+  {% if posts %}
+    {% for post in posts %}
+      <div class="card mb-2">
+        <div class="card-body">
+          <h5 class="card-title">{{ post.title }}</h5>
+          <p class="card-text">{{ post.content|truncatechars:100 }}</p>
+          {% if post.file %}
+            <p><a href="{{ post.file.url }}" target="_blank">Download Attachment</a></p>
+          {% endif %}
+          <a href="{% url 'post_detail' post.slug %}" class="btn btn-sm btn-outline-secondary">View Details</a>
+        </div>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p class="text-muted">No posts yet for this course.</p>
+  {% endif %}
+{% endblock %}
