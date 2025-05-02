@@ -8,9 +8,10 @@ from django.contrib.auth import (
 )
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
 
 from .forms import UserRegisterForm, PostForm, ProfileForm, CommentForm
-from .models import Profile, Discipline, Course, Post, Comment
+from .models import Profile, Discipline, Course, Post, Comment, Like
 
 
 def home(request):
@@ -127,7 +128,6 @@ def create_post(request, slug):
 @login_required
 def post_detail(request, slug):
     post = get_object_or_404(Post, slug=slug)
-    # Yeni: Yorum formunu ve var olan yorumları şablona geç
     comment_form = CommentForm()
     return render(request, 'post_detail.html', {
         'post': post,
@@ -138,7 +138,7 @@ def post_detail(request, slug):
 @login_required
 def add_comment(request, post_id):
     post = get_object_or_404(Post, id=post_id)
-    if request.method == "POST":
+    if request.method == 'POST':
         form = CommentForm(request.POST)
         if form.is_valid():
             comment = form.save(commit=False)
@@ -176,7 +176,6 @@ def delete_post(request, slug):
         return redirect('course_detail', slug=course_slug)
     return render(request, 'post_confirm_delete.html', {'post': post})
 
-from django.core.exceptions import PermissionDenied
 
 @login_required
 def edit_comment(request, comment_id):
@@ -195,6 +194,7 @@ def edit_comment(request, comment_id):
         'comment': comment,
     })
 
+
 @login_required
 def delete_comment(request, comment_id):
     comment = get_object_or_404(Comment, id=comment_id)
@@ -207,3 +207,17 @@ def delete_comment(request, comment_id):
     return render(request, 'comment_confirm_delete.html', {
         'comment': comment,
     })
+
+
+@login_required
+def toggle_like(request, post_id):
+    """
+    Toggle like/unlike on a post.
+    Eğer kullanıcı zaten beğenmişse beğeniyi siler, aksi halde beğeni ekler.
+    """
+    post = get_object_or_404(Post, id=post_id)
+    if request.user in post.likes.all():
+        Like.objects.filter(user=request.user, post=post).delete()
+    else:
+        Like.objects.create(user=request.user, post=post)
+    return redirect('post_detail', slug=post.slug)

@@ -24,4 +24,7 @@ urlpatterns = [
     path('posts/<int:post_id>/comment/', views.add_comment, name='add_comment'),
     path('comment/<int:comment_id>/edit/',   views.edit_comment,   name='edit_comment'),
     path('comment/<int:comment_id>/delete/', views.delete_comment, name='delete_comment'),
+    
+     # Like toggle için eklenen rota:
+    path('posts/<int:post_id>/like/',       views.toggle_like,    name='toggle_like'),
 ]
