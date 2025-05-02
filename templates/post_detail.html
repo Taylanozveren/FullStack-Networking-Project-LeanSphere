@@ -1,17 +1,83 @@
+{# templates/post_detail.html #}
 {% extends 'base.html' %}
 {% block content %}
 <div class="container mt-4">
+
   <h2>{{ post.title }}</h2>
-  <p class="text-muted">by {{ post.author.username }} on {{ post.created_at|date:"F j, Y, g:i a" }}</p>
-  <p>{{ post.content|linebreaks }}</p>
+  <p class="text-muted">
+    by {{ post.author.username }} on {{ post.created_at|date:"F j, Y, g:i a" }}
+  </p>
+  <div class="mb-3">{{ post.content|linebreaks }}</div>
+
   {% if post.file %}
     <hr>
-    <p><strong>Attachment:</strong> <a href="{{ post.file.url }}" download>{{ post.file.name|slice:"8:" }}</a></p>
+    <p>
+      <strong>Attachment:</strong>
+      <a href="{{ post.file.url }}" download>
+        {{ post.file.name|slice:"8:" }}
+      </a>
+    </p>
   {% endif %}
+
   {% if request.user == post.author %}
     <hr>
-    <a href="{% url 'edit_post' post.slug %}" class="btn btn-outline-primary">Edit</a>
-    <a href="{% url 'delete_post' post.slug %}" class="btn btn-outline-danger ms-2">Delete</a>
+    <a href="{% url 'edit_post' post.slug %}" class="btn btn-outline-primary">Edit Post</a>
+    <a href="{% url 'delete_post' post.slug %}" class="btn btn-outline-danger ms-2">Delete Post</a>
   {% endif %}
+
+  <!-- Like Toggle Bölümü -->
+  <hr>
+  {% if user.is_authenticated %}
+    <form method="post" action="{% url 'toggle_like' post.id %}">
+      {% csrf_token %}
+      {% if user in post.likes.all %}
+        <button type="submit" class="btn btn-sm btn-outline-danger">
+          ❤️ Unlike
+        </button>
+      {% else %}
+        <button type="submit" class="btn btn-sm btn-outline-primary">
+          🤍 Like
+        </button>
+      {% endif %}
+      <span class="ms-2">{{ post.likes.count }} likes</span>
+    </form>
+  {% else %}
+    <p class="text-muted">
+      You must <a href="{% url 'login' %}">log in</a> to like posts.
+    </p>
+  {% endif %}
+
+  <!-- Comments Bölümü -->
+  <hr>
+  <h4>Comments</h4>
+  {% for comment in post.comments.all %}
+    <div class="mb-3 p-3 border rounded position-relative">
+      <strong>{{ comment.user.username }}</strong>
+      <small class="text-muted">— {{ comment.created_at|date:"M j, Y H:i" }}</small>
+      <p class="mb-1">{{ comment.content }}</p>
+
+      {% if user == comment.user or user.is_superuser %}
+        <div class="position-absolute top-0 end-0">
+          <a href="{% url 'edit_comment' comment.id %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+          <a href="{% url 'delete_comment' comment.id %}" class="btn btn-sm btn-outline-danger">Delete</a>
+        </div>
+      {% endif %}
+    </div>
+  {% empty %}
+    <p class="text-muted">No comments yet.</p>
+  {% endfor %}
+
+  {% if user.is_authenticated %}
+    <form method="post" action="{% url 'add_comment' post.id %}">
+      {% csrf_token %}
+      {{ comment_form.as_p }}
+      <button type="submit" class="btn btn-primary">Add Comment</button>
+    </form>
+  {% else %}
+    <p class="text-muted">
+      You must <a href="{% url 'login' %}">log in</a> to post a comment.
+    </p>
+  {% endif %}
+
 </div>
 {% endblock %}
