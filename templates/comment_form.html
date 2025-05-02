@@ -1,0 +1,17 @@
+{# templates/comment_form.html #}
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+  <h4>
+    {% if comment.id %}Edit Comment{% else %}New Comment{% endif %}
+  </h4>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">
+      {% if comment.id %}Update{% else %}Save{% endif %}
+    </button>
+    <a href="{% url 'post_detail' comment.post.slug %}" class="btn btn-secondary ms-2">Cancel</a>
+  </form>
+</div>
+{% endblock %}

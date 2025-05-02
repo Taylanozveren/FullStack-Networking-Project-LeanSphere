@@ -1,3 +1,5 @@
+# core/urls.py
+
 from django.urls import path
 from . import views
 
@@ -17,4 +19,9 @@ urlpatterns = [
     path('posts/<slug:slug>/', views.post_detail, name='post_detail'),
     path('posts/<slug:slug>/edit/', views.edit_post, name='edit_post'),
     path('posts/<slug:slug>/delete/', views.delete_post, name='delete_post'),
+
+    # Yeni: Yorum ekleme rotası
+    path('posts/<int:post_id>/comment/', views.add_comment, name='add_comment'),
+    path('comment/<int:comment_id>/edit/',   views.edit_comment,   name='edit_comment'),
+    path('comment/<int:comment_id>/delete/', views.delete_comment, name='delete_comment'),
 ]
