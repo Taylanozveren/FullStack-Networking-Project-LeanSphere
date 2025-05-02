@@ -1,10 +1,12 @@
+# core/forms.py
+
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
 import os
 
-from .models import Post, Profile
+from .models import Post, Profile, Comment
 
 # ---------- yardımcı doğrulayıcılar ----------
 def validate_file_size(f):
@@ -23,6 +25,7 @@ class UserRegisterForm(UserCreationForm):
         model = User
         fields = ['username', 'email', 'password1', 'password2']
 
+
 class PostForm(forms.ModelForm):
     file = forms.FileField(required=False,
                            validators=[validate_file_size, validate_extension])
@@ -30,15 +33,32 @@ class PostForm(forms.ModelForm):
         model = Post
         fields = ['title', 'content', 'file']
         widgets = {
-            'content': forms.Textarea(attrs={'rows':5,
-                                             'placeholder':'Write your content here…'}),
+            'content': forms.Textarea(attrs={
+                'rows': 5,
+                'placeholder': 'Write your content here…'
+            }),
         }
+
 
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
         fields = ['bio', 'avatar']
         widgets = {
-            'bio': forms.Textarea(attrs={'rows':4,
-                                         'placeholder':'Tell us about yourself…'}),
+            'bio': forms.Textarea(attrs={
+                'rows': 4,
+                'placeholder': 'Tell us about yourself…'
+            }),
+        }
+
+
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ['content']
+        widgets = {
+            'content': forms.Textarea(attrs={
+                'rows': 2,
+                'placeholder': 'Yorum yaz...'
+            }),
         }
