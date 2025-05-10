@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h2>Your Dashboard</h2>
+
+  <div class="row mt-4">
+    <!-- Total Posts -->
+    <div class="col-md-4">
+      <div class="card mb-3 p-3">
+        <h5>Total Posts</h5>
+        <p class="fs-3 mb-0">{{ total_posts }}</p>
+      </div>
+    </div>
+
+    <!-- Top Liked Post -->
+    <div class="col-md-4">
+      <div class="card mb-3 p-3">
+        <h5>Top Liked Post</h5>
+        {% if top_liked %}
+          <p class="mb-0">
+            <strong>{{ top_liked.title }}</strong>
+            — {{ top_liked.like_count }} like{{ top_liked.like_count|pluralize }}
+          </p>
+        {% else %}
+          <p class="text-muted mb-0">No posts yet.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Most Active Course -->
+    <div class="col-md-4">
+      <div class="card mb-3 p-3">
+        <h5>Most Active Course</h5>
+        {% if active_course %}
+          <p class="mb-0">
+            <strong>{{ active_course.title }}</strong>
+            — {{ active_course.post_count }} post{{ active_course.post_count|pluralize }}
+          </p>
+        {% else %}
+          <p class="text-muted mb-0">No courses joined.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="row mt-4">
+    <!-- Posts per Course -->
+    <div class="col-md-6">
+      <div class="card p-3 mb-4">
+        <h5>Posts per Course</h5>
+        {% if course_stats %}
+          <div class="chart-container mb-3" style="position: relative; height: 350px;">
+            <canvas id="donutChart"></canvas>
+          </div>
+        {% else %}
+          <p class="text-muted">No data to display.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Top 5 Liked Posts -->
+    <div class="col-md-6">
+      <div class="card p-3 mb-4">
+        <h5>Top 5 Liked Posts</h5>
+        {% if top5_posts %}
+          <div class="chart-container mb-3" style="position: relative; height: 350px;">
+            <canvas id="barChart"></canvas>
+          </div>
+        {% else %}
+          <p class="text-muted">No data to display.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    {% if course_stats %}
+      const donutData = {{ course_stats|safe }};
+      new Chart(
+        document.getElementById('donutChart').getContext('2d'),
+        {
+          type: 'doughnut',
+          data: {
+            labels: donutData.map(c => c.title),
+            datasets: [{ data: donutData.map(c => c.post_count) }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+          }
+        }
+      );
+    {% endif %}
+
+    {% if top5_posts %}
+      const barData = {{ top5_posts|safe }};
+      new Chart(
+        document.getElementById('barChart').getContext('2d'),
+        {
+          type: 'bar',
+          data: {
+            labels: barData.map(p => p.title),
+            datasets: [{
+              label: 'Likes',
+              data: barData.map(p => p.like_count),
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: { y: { beginAtZero: true } }
+          }
+        }
+      );
+    {% endif %}
+  </script>
+{% endblock %}
