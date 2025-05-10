@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2>Search results for “{{ q }}”</h2>
+  <hr>
+  {% for post in results %}
+    <div class="card mb-3">
+      <div class="card-body">
+        <h5 class="card-title">{{ post.title }}</h5>
+        <p class="card-text text-truncate">{{ post.content }}</p>
+        <a href="{% url 'post_detail' post.slug %}" class="btn btn-primary btn-sm">View Details</a>
+      </div>
+    </div>
+  {% empty %}
+    <p class="text-muted">No posts found matching your query.</p>
+  {% endfor %}
+</div>
+{% endblock %}

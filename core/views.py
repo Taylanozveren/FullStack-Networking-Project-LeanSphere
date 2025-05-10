@@ -9,6 +9,7 @@ from django.contrib.auth import (
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
+from django.db.models import Q, Count
 
 from .forms import UserRegisterForm, PostForm, ProfileForm, CommentForm
 from .models import Profile, Discipline, Course, Post, Comment, Like
@@ -82,19 +83,33 @@ def course_list(request):
 
 @login_required
 def course_detail(request, slug):
-    course    = get_object_or_404(Course, slug=slug)
-    posts     = course.posts.all().order_by('-created_at')
+    course = get_object_or_404(Course, slug=slug)
+
+    # File-type filter param: all/pdf/image/text
+    filter_type = request.GET.get('filter', 'all')
+    all_posts = course.posts.all().order_by('-created_at')
+
+    if filter_type == 'pdf':
+        posts = all_posts.filter(file__iendswith='.pdf')
+    elif filter_type == 'image':
+        posts = all_posts.filter(file__iregex=r'\.(png|jpe?g)$')
+    elif filter_type == 'text':
+        posts = all_posts.filter(file__iendswith='.txt')
+    else:
+        posts = all_posts
+
     is_joined = course in request.user.profile.joined_courses.all()
     return render(request, 'course_detail.html', {
         'course': course,
         'posts': posts,
         'is_joined': is_joined,
+        'filter_type': filter_type,
     })
 
 
 @login_required
 def join_course(request, slug):
-    course  = get_object_or_404(Course, slug=slug)
+    course = get_object_or_404(Course, slug=slug)
     profile = request.user.profile
     if course in profile.joined_courses.all():
         profile.joined_courses.remove(course)
@@ -209,15 +224,80 @@ def delete_comment(request, comment_id):
     })
 
 
+# --- GLOBAL SEARCH ---
+@login_required
+def search(request):
+    q = request.GET.get('q', '').strip()
+    results = Post.objects.filter(
+        Q(title__icontains=q) |
+        Q(content__icontains=q) |
+        Q(course__title__icontains=q) |
+        Q(course__discipline__name__icontains=q)
+    ).order_by('-created_at')
+    return render(request, 'search_results.html', {
+        'results': results,
+        'q': q,
+    })
+
+
+# --- LIKE TOGGLE ---
 @login_required
 def toggle_like(request, post_id):
-    """
-    Toggle like/unlike on a post.
-    Eğer kullanıcı zaten beğenmişse beğeniyi siler, aksi halde beğeni ekler.
-    """
     post = get_object_or_404(Post, id=post_id)
     if request.user in post.likes.all():
         Like.objects.filter(user=request.user, post=post).delete()
     else:
         Like.objects.create(user=request.user, post=post)
     return redirect('post_detail', slug=post.slug)
+
+
+# --- DASHBOARD & ANALYTICS ---
+@login_required
+def dashboard(request):
+    profile = request.user.profile
+
+    # 1. Toplam post sayısı
+    total_posts = Post.objects.filter(author=request.user).count()
+
+    # 2. En çok beğeni alan gönderi
+    top_liked = (
+        Post.objects
+            .filter(author=request.user)
+            .annotate(like_count=Count('likes'))
+            .order_by('-like_count')
+            .first()
+    )
+
+    # 3. Kullanıcının en aktif olduğu ders
+    active_course = (
+        Course.objects
+            .filter(members=profile)
+            .annotate(post_count=Count('posts'))
+            .order_by('-post_count')
+            .first()
+    )
+
+    # 4. Derslere göre post dağılımı (donut chart)
+    course_stats = (
+        Course.objects
+            .filter(members=profile)
+            .annotate(post_count=Count('posts'))
+            .values('title', 'post_count')
+    )
+
+    # 5. Top 5 beğeni alan post (bar chart)
+    top5_posts = (
+        Post.objects
+            .filter(author=request.user)
+            .annotate(like_count=Count('likes'))
+            .order_by('-like_count')[:5]
+            .values('title', 'like_count')
+    )
+
+    return render(request, 'dashboard.html', {
+        'total_posts': total_posts,
+        'top_liked': top_liked,
+        'active_course': active_course,
+        'course_stats': list(course_stats),
+        'top5_posts': list(top5_posts),
+    })

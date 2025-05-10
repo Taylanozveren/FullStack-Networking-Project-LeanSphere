@@ -1,3 +1,4 @@
+{# templates/course_detail.html #}
 {% extends 'base.html' %}
 {% block content %}
   <div class="d-flex justify-content-between align-items-center mb-3">
@@ -17,8 +18,30 @@
       {% endif %}
     </div>
   </div>
+
   <p>{{ course.description }}</p>
   <hr>
+
+  {# Dosya türü filtreleme butonları #}
+  <div class="mb-3">
+    <a href="?filter=all"
+       class="btn btn-sm {% if filter_type == 'all' %}btn-primary{% else %}btn-outline-primary{% endif %} me-1">
+      All
+    </a>
+    <a href="?filter=pdf"
+       class="btn btn-sm {% if filter_type == 'pdf' %}btn-primary{% else %}btn-outline-primary{% endif %} me-1">
+      PDF
+    </a>
+    <a href="?filter=image"
+       class="btn btn-sm {% if filter_type == 'image' %}btn-primary{% else %}btn-outline-primary{% endif %} me-1">
+      Images
+    </a>
+    <a href="?filter=text"
+       class="btn btn-sm {% if filter_type == 'text' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+      Text
+    </a>
+  </div>
+
   <h4>Posts</h4>
   {% if posts %}
     {% for post in posts %}
@@ -29,7 +52,9 @@
           {% if post.file %}
             <p><a href="{{ post.file.url }}" target="_blank">Download Attachment</a></p>
           {% endif %}
-          <a href="{% url 'post_detail' post.slug %}" class="btn btn-sm btn-outline-secondary">View Details</a>
+          <a href="{% url 'post_detail' post.slug %}" class="btn btn-sm btn-outline-secondary">
+            View Details
+          </a>
         </div>
       </div>
     {% endfor %}
