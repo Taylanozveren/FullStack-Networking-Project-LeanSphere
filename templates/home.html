@@ -1,8 +1,81 @@
 {% extends 'base.html' %}
-
 {% block content %}
-<div class="text-center mt-5">
+
+<!-- Hero Section -->
+<section class="hero">
+  <div class="container px-3 px-lg-5">
     <h1>Welcome to LearnSphere 🚀</h1>
-    <p>Explore, Share, and Learn Together!</p>
-</div>
+    <p class="lead">
+      Explore courses, share knowledge &amp; connect with peers worldwide.
+    </p>
+
+    <div>
+      {% if not user.is_authenticated %}
+        <a href="{% url 'register' %}" class="btn btn-lg btn-success">Get Started</a>
+        <a href="#features" class="btn btn-lg btn-outline-light">Discover All Features ⭐️</a>
+      {% else %}
+        <a href="{% url 'dashboard' %}" class="btn btn-lg btn-success">Go to Dashboard</a>
+        <a href="{% url 'course_list' %}" class="btn btn-lg btn-outline-light">Browse Courses</a>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<!-- Features Section -->
+<section id="features" class="features">
+  <div class="container px-3 px-lg-5">
+    <h2 class="text-center">Why LearnSphere? 🤔</h2>
+    <div class="row gy-4">
+      <!-- 1. Course Library -->
+      <div class="col-sm-6 col-lg-3">
+        <div class="card text-center h-100 shadow-sm skeleton">
+          <i class="bi bi-journal-code"></i>
+          <h5 class="card-title mt-3">Course Library</h5>
+          <p class="card-text">Browse &amp; join a wide range of computer science courses.</p>
+        </div>
+      </div>
+
+      <!-- 2. Collaborative Posts -->
+      <div class="col-sm-6 col-lg-3">
+        <div class="card text-center h-100 shadow-sm skeleton">
+          <i class="bi bi-chat-dots"></i>
+          <h5 class="card-title mt-3">Collaborative Posts</h5>
+          <p class="card-text">Share notes, code snippets &amp; resources seamlessly.</p>
+        </div>
+      </div>
+
+      <!-- 3. Personal Analytics -->
+      <div class="col-sm-6 col-lg-3">
+        <div class="card text-center h-100 shadow-sm skeleton">
+          <i class="bi bi-bar-chart-line"></i>
+          <h5 class="card-title mt-3">Personal Analytics</h5>
+          <p class="card-text">Track your activity on your own dashboard.</p>
+        </div>
+      </div>
+
+      <!-- 4. AI-Powered Insights -->
+      <div class="col-sm-6 col-lg-3">
+        <div class="card text-center h-100 shadow-sm skeleton">
+          <i class="bi bi-robot"></i>
+          <h5 class="card-title mt-3">AI-Powered Insights</h5>
+          <p class="card-text">
+            Auto-summarize PDFs, get content suggestions &amp; more 🤖📚.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Skeleton removal script -->
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+      document.querySelectorAll('.features .card.skeleton').forEach(c => {
+        c.classList.remove('skeleton');
+      });
+    }, 1200);
+  });
+</script>
+
 {% endblock %}
