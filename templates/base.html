@@ -5,60 +5,46 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>LearnSphere</title>
+  <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/components.css' %}">
+  <!-- Favicon -->
+  <link rel="icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
 </head>
 <body>
+
   <!-- NAVBAR -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-    <div class="container">
-      <a class="navbar-brand" href="{% url 'home' %}">LearnSphere</a>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+    <div class="container px-3 px-lg-5">
+      <a class="navbar-brand d-flex align-items-center" href="{% url 'home' %}">
+        <i class="bi bi-globe2-fill fs-3 text-white"></i>
+        <span class="ms-2 fs-4 fw-semibold text-white">LearnSphere</span>
+      </a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
-        <!-- SOL TARAF: (isteğe bağlı logo veya linkler) -->
-        <ul class="navbar-nav me-auto">
-          <!-- boş bırakıldı, isteğe göre link ekleyebilirsin -->
-        </ul>
-
-        <!-- ORTA: GLOBAL SEARCH -->
         {% if user.is_authenticated %}
-          <form class="d-flex me-3" action="{% url 'search' %}" method="get">
-            <input 
-              class="form-control me-2" 
-              type="search" 
-              name="q" 
-              placeholder="Search posts..." 
-              aria-label="Search"
-              required
-            >
-            <button class="btn btn-outline-light" type="submit">Search</button>
+          <form class="d-flex me-auto" action="{% url 'search' %}" method="get">
+            <input class="form-control me-2" type="search" name="q" placeholder="Search posts..." required>
+            <button class="btn btn-outline-light">Search</button>
           </form>
+        {% else %}
+          <div class="me-auto"></div>
         {% endif %}
-
-        <!-- SAĞ TARAF: Dashboard + Auth / Navigation -->
         <ul class="navbar-nav">
           {% if user.is_authenticated %}
-            <li class="nav-item me-2">
-              <a class="btn btn-outline-light" href="{% url 'dashboard' %}">Dashboard</a>
-            </li>
-            <li class="nav-item me-2">
-              <a class="btn btn-outline-light" href="{% url 'course_list' %}">Courses</a>
-            </li>
-            <li class="nav-item me-2">
-              <a class="btn btn-outline-light" href="{% url 'profile' %}">Profile</a>
-            </li>
-            <li class="nav-item">
-              <a class="btn btn-outline-warning" href="{% url 'logout' %}">Logout</a>
-            </li>
+            <li class="nav-item me-2"><a class="btn btn-outline-light" href="{% url 'dashboard' %}">Dashboard</a></li>
+            <li class="nav-item me-2"><a class="btn btn-outline-light" href="{% url 'course_list' %}">Courses</a></li>
+            <li class="nav-item me-2"><a class="btn btn-outline-light" href="{% url 'profile' %}">Profile</a></li>
+            <li class="nav-item"><a class="btn btn-warning" href="{% url 'logout' %}">Logout</a></li>
           {% else %}
-            <li class="nav-item me-2">
-              <a class="btn btn-outline-light" href="{% url 'login' %}">Login</a>
-            </li>
-            <li class="nav-item">
-              <a class="btn btn-outline-success" href="{% url 'register' %}">Register</a>
-            </li>
+            <li class="nav-item me-2"><a class="btn btn-outline-light" href="{% url 'login' %}">Login</a></li>
+            <li class="nav-item"><a class="btn btn-success" href="{% url 'register' %}">Register</a></li>
           {% endif %}
         </ul>
       </div>
@@ -67,9 +53,9 @@
 
   <!-- FLASH MESSAGES -->
   {% if messages %}
-    <div class="container mt-3">
+    <div class="container px-3 px-lg-5 mt-3">
       {% for m in messages %}
-        <div class="alert alert-{{ m.tags }} alert-dismissible fade show" role="alert">
+        <div class="alert alert-{{ m.tags }} alert-dismissible fade show">
           {{ m }}
           <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
@@ -78,16 +64,29 @@
   {% endif %}
 
   <!-- PAGE CONTENT -->
-  <div class="container mt-4">
-    {% block content %}{% endblock %}
-  </div>
+  {% block content %}{% endblock %}
 
-  <footer class="bg-light text-center text-lg-start mt-5">
-    <div class="text-center p-3">
-      © 2025 LearnSphere | Developed with ❤️
+  <!-- BACK TO TOP BUTTON -->
+  <button id="backToTop" class="btn btn-primary position-fixed" style="bottom:1rem; right:1rem; display:none;">
+    ↑ Top
+  </button>
+
+  <!-- FOOTER -->
+  <footer class="bg-light text-center py-3 mt-5">
+    <div class="container">
+      <small>© 2025 LearnSphere | Developed with ❤️</small>
     </div>
   </footer>
 
+  <!-- Bootstrap JS Bundle -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Back to Top
+    const btn = document.getElementById('backToTop');
+    window.addEventListener('scroll', () => {
+      btn.style.display = window.scrollY > 300 ? 'block' : 'none';
+    });
+    btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+  </script>
 </body>
 </html>

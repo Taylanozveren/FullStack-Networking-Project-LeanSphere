@@ -1,0 +1,81 @@
+/* 0. Smooth scroll for anchor links */
+html {
+  scroll-behavior: smooth;
+}
+
+/* 1. CSS Variables & Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600&family=Roboto&display=swap');
+
+:root {
+  --primary:       #0053ba;
+  --secondary:     #e83e8c;
+  --gray-light:    #f8f9fa;
+  --font-heading:  'Montserrat', sans-serif;
+  --font-body:     'Roboto', sans-serif;
+}
+
+/* 2. Base Styles */
+body {
+  font-family: var(--font-body);
+  background-color: var(--gray-light);
+  margin: 0;
+  padding: 0;
+}
+h1,h2,h3,h4,h5,h6 {
+  font-family: var(--font-heading);
+}
+
+/* 3. Navbar — biraz daha koyu ton */
+.navbar {
+  background-color: #003d8a !important;
+}
+
+/* 4. Buttons */
+.btn-primary {
+  background-color: var(--primary);
+  border-color: var(--primary);
+  transition: filter .2s, transform .2s;
+}
+.btn-primary:hover,
+.btn-primary:focus {
+  filter: brightness(1.1);
+}
+.btn-success {
+  background-color: var(--secondary);
+  border-color: var(--secondary);
+  transition: filter .2s;
+}
+.btn-success:hover,
+.btn-success:focus {
+  filter: brightness(1.1);
+}
+.btn-outline-light:hover {
+  background-color: rgba(255,255,255,0.1);
+}
+
+/* 5. Forms */
+.form-control:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 .2rem rgba(0,83,186,.25);
+}
+
+/* 6. Cards & Alerts */
+.card {
+  border: none;
+  border-radius: .5rem;
+}
+.shadow-sm {
+  box-shadow: 0 .125rem .25rem rgba(0,0,0,.075) !important;
+}
+.alert {
+  border-radius: .25rem;
+}
+
+/* 7. Footer */
+footer {
+  font-size: .9rem;
+  color: #6c757d;
+}
+
+/* 8. Utility */
+.mx-auto { margin: 0 auto !important; }

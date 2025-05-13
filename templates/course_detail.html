@@ -1,6 +1,8 @@
 {# templates/course_detail.html #}
 {% extends 'base.html' %}
+
 {% block content %}
+<div class="container px-3 px-lg-5 py-5">
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h2>{{ course.code }} – {{ course.title }}</h2>
     <div>
@@ -42,10 +44,10 @@
     </a>
   </div>
 
-  <h4>Posts</h4>
+  <h4 class="mt-4">Posts</h4>
   {% if posts %}
     {% for post in posts %}
-      <div class="card mb-2">
+      <div class="card mb-3 shadow-sm">
         <div class="card-body">
           <h5 class="card-title">{{ post.title }}</h5>
           <p class="card-text">{{ post.content|truncatechars:100 }}</p>
@@ -61,4 +63,5 @@
   {% else %}
     <p class="text-muted">No posts yet for this course.</p>
   {% endif %}
+</div>
 {% endblock %}
