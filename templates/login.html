@@ -1,23 +1,47 @@
 {% extends 'base.html' %}
-
+{% load socialaccount %}
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <h2 class="text-center">Login</h2>
-        <form method="POST">
-            {% csrf_token %}
-            <div class="mb-3">
-                <label for="username" class="form-label">Username</label>
-                <input type="text" name="username" class="form-control" required>
-            </div>
-            <div class="mb-3">
-                <label for="password" class="form-label">Password</label>
-                <input type="password" name="password" class="form-control" required>
-            </div>
-            <div class="text-center">
-                <button type="submit" class="btn btn-primary">Login</button>
-            </div>
-        </form>
+<div class="row justify-content-center align-items-center min-vh-80" style="min-height: 80vh;">
+  <div class="col-md-6 col-lg-5">
+    <div class="card shadow-sm p-4">
+      <div class="text-center mb-3">
+        <h2 class="fw-bold mb-1">Welcome Back!</h2>
+        <p class="text-muted mb-3">Log in to continue to <span class="fw-bold">LearnSphere 🚀</span></p>
+      </div>
+      <!-- Sadece Google ile Giriş Butonu -->
+      <div class="mb-3 text-center">
+        <a href="{% provider_login_url 'google' %}" class="btn btn-outline-danger w-100 mb-2" style="font-weight: 500;">
+          <i class="bi bi-google"></i> Continue with Google
+        </a>
+      </div>
+      <div class="d-flex align-items-center mb-3">
+        <hr class="flex-grow-1">
+        <span class="mx-2 text-muted small">or</span>
+        <hr class="flex-grow-1">
+      </div>
+      <form method="POST" autocomplete="on">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label for="username" class="form-label">Username</label>
+          <input type="text" name="username" class="form-control" required autofocus>
+        </div>
+        <div class="mb-3">
+          <label for="password" class="form-label">Password</label>
+          <input type="password" name="password" class="form-control" required>
+        </div>
+        <div class="text-center">
+          <button type="submit" class="btn btn-primary w-100">
+            <i class="bi bi-box-arrow-in-right"></i> Login
+          </button>
+        </div>
+      </form>
+      <div class="text-center mt-3">
+        <small>
+          Don't have an account?
+          <a href="{% url 'register' %}" class="fw-semibold">Register</a>
+        </small>
+      </div>
     </div>
+  </div>
 </div>
 {% endblock %}

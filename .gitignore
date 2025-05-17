@@ -6,3 +6,4 @@ media/
 staticfiles/
 .env
 .vscode/
+.env

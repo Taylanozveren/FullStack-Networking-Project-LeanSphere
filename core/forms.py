@@ -25,7 +25,6 @@ class UserRegisterForm(UserCreationForm):
         model = User
         fields = ['username', 'email', 'password1', 'password2']
 
-
 class PostForm(forms.ModelForm):
     file = forms.FileField(required=False,
                            validators=[validate_file_size, validate_extension])
@@ -39,18 +38,19 @@ class PostForm(forms.ModelForm):
             }),
         }
 
-
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ['bio', 'avatar']
+        fields = ['bio', 'avatar', 'github_url', 'linkedin_url', 'phone_number']
         widgets = {
             'bio': forms.Textarea(attrs={
                 'rows': 4,
                 'placeholder': 'Tell us about yourself…'
             }),
+            'github_url': forms.URLInput(attrs={'placeholder': 'GitHub profile URL'}),
+            'linkedin_url': forms.URLInput(attrs={'placeholder': 'LinkedIn profile URL'}),
+            'phone_number': forms.TextInput(attrs={'placeholder': 'Phone number'}),
         }
-
 
 class CommentForm(forms.ModelForm):
     class Meta:

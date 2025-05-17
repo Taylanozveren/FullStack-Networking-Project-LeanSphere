@@ -1,28 +1,85 @@
 {% extends 'base.html' %}
 {% load static %}
-
 {% block content %}
-<div class="container mt-4">
-  <h2>
-    {{ profile.user.username }}’in Profili
-    <a href="{% url 'edit_profile' %}" class="btn btn-sm btn-outline-primary float-end">Edit</a>
-  </h2>
-  <div class="row mt-3">
-    <div class="col-md-3">
-      <img src="{{ profile.avatar.url }}" class="img-fluid rounded-circle" alt="Avatar">
-    </div>
-    <div class="col-md-9">
-      <p><strong>Bio:</strong> {{ profile.bio|default:"Henüz bio eklenmemiş." }}</p>
-      <h5>Katıldığı Dersler:</h5>
-      <ul>
-        {% for course in joined_courses %}
-          <li>
-            <a href="{% url 'course_detail' course.slug %}">
-              {{ course.code }} – {{ course.title }}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <!-- Profile card -->
+    <div class="col-md-4 mb-4">
+      <div class="card shadow-sm text-center">
+        <div class="card-body">
+          <div class="position-relative d-inline-block">
+            <img src="{{ profile.avatar.url }}" onerror="this.src='{% static 'img/default_avatar.png' %}'"
+                 class="rounded-circle border mb-2" style="width:130px; height:130px; object-fit:cover;" alt="Avatar">
+            <a href="{% url 'edit_profile' %}" class="position-absolute bottom-0 end-0 translate-middle badge rounded-pill bg-primary"
+              style="font-size:1.1rem; cursor:pointer;" title="Change avatar">
+              <i class="bi bi-pencil-fill"></i>
             </a>
+          </div>
+          <h4 class="mt-2 mb-1">{{ profile.user.username }}</h4>
+          <p class="mb-0 small text-muted">{{ profile.user.email }}</p>
+          {% if profile.bio %}
+            <p class="mt-3">{{ profile.bio }}</p>
+          {% else %}
+            <p class="text-muted">No bio added yet.</p>
+          {% endif %}
+          <div class="my-2">
+            {% if profile.github_url %}
+              <a href="{{ profile.github_url }}" class="btn btn-outline-dark btn-sm me-1" target="_blank" title="GitHub">
+                <i class="bi bi-github"></i>
+              </a>
+            {% endif %}
+            {% if profile.linkedin_url %}
+              <a href="{{ profile.linkedin_url }}" class="btn btn-outline-primary btn-sm" target="_blank" title="LinkedIn">
+                <i class="bi bi-linkedin"></i>
+              </a>
+            {% endif %}
+          </div>
+          {% if profile.phone_number %}
+            <span class="badge bg-light text-dark border mt-2" style="font-size:1rem;">
+              <i class="bi bi-telephone me-1"></i> Phone: {{ profile.phone_number }}
+            </span>
+          {% endif %}
+        </div>
+        <div class="card-footer bg-transparent border-0 py-2">
+          <a href="{% url 'edit_profile' %}" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-pencil"></i> Edit Profile
+          </a>
+        </div>
+      </div>
+      <div class="mt-3 text-center">
+        <small class="text-muted">Member since: {{ profile.user.date_joined|date:"Y-m-d" }}</small><br>
+        <small class="text-muted">Total Posts: {{ profile.user.posts.count }}</small>
+      </div>
+    </div>
+
+    <!-- Courses & Activity -->
+    <div class="col-md-6">
+      <h5 class="mb-3">Joined Courses</h5>
+      {% if joined_courses %}
+        <ul class="list-group mb-4">
+          {% for course in joined_courses %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <span>
+                <a href="{% url 'course_detail' course.slug %}" class="fw-semibold">{{ course.code }} – {{ course.title }}</a>
+              </span>
+              <span class="badge bg-primary rounded-pill">{{ course.members.count }} joined</span>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <div class="alert alert-info">
+          You haven’t joined any courses yet. <a href="{% url 'course_list' %}">Browse Courses ➜</a>
+        </div>
+      {% endif %}
+      <h6 class="mt-4">Recent Activity</h6>
+      <ul class="list-unstyled">
+        {% for post in profile.user.posts.all|slice:":3" %}
+          <li class="mb-1">
+            <a href="{% url 'post_detail' post.slug %}">{{ post.title }}</a>
+            <small class="text-muted">({{ post.created_at|date:"M d, Y" }})</small>
           </li>
         {% empty %}
-          <li>Henüz ders eklemediniz.</li>
+          <li class="text-muted">No recent posts.</li>
         {% endfor %}
       </ul>
     </div>
