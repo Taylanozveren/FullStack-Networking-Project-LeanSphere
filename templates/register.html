@@ -1,16 +1,40 @@
 {% extends 'base.html' %}
-
+{% load socialaccount %}
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <h2 class="text-center">Register</h2>
-        <form method="POST">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <div class="text-center">
-                <button type="submit" class="btn btn-primary">Sign Up</button>
-            </div>
-        </form>
+<div class="row justify-content-center align-items-center min-vh-80" style="min-height: 80vh;">
+  <div class="col-md-6 col-lg-5">
+    <div class="card shadow-sm p-4">
+      <div class="text-center mb-3">
+        <h2 class="fw-bold mb-1">Create Account</h2>
+        <p class="text-muted mb-3">Join the <span class="fw-bold">LearnSphere</span> community and start sharing knowledge!</p>
+      </div>
+      <!-- Sadece Google ile Üyelik Butonu -->
+      <div class="mb-3 text-center">
+        <a href="{% provider_login_url 'google' %}" class="btn btn-outline-danger w-100 mb-2" style="font-weight: 500;">
+          <i class="bi bi-google"></i> Continue with Google
+        </a>
+      </div>
+      <div class="d-flex align-items-center mb-3">
+        <hr class="flex-grow-1">
+        <span class="mx-2 text-muted small">or</span>
+        <hr class="flex-grow-1">
+      </div>
+      <form method="POST" autocomplete="on">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div class="text-center">
+          <button type="submit" class="btn btn-success w-100">
+            <i class="bi bi-person-plus"></i> Sign Up
+          </button>
+        </div>
+      </form>
+      <div class="text-center mt-3">
+        <small>
+          Already have an account?
+          <a href="{% url 'login' %}" class="fw-semibold">Login</a>
+        </small>
+      </div>
     </div>
+  </div>
 </div>
 {% endblock %}
