@@ -5,6 +5,8 @@ from django.contrib.auth.models import User
 from django.utils.text import slugify
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils import timezone
+
 
 class Discipline(models.Model):
     name = models.CharField(max_length=60, unique=True)
@@ -96,6 +98,22 @@ class Like(models.Model):
 
     def __str__(self):
         return f"{self.user.username} liked {self.post.title}"
+
+# Notification modelini burada, **sınıfın dışında**, en sona ekle!
+class Notification(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="notifications")
+    from_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="sent_notifications")
+    post = models.ForeignKey('Post', on_delete=models.CASCADE, null=True, blank=True)
+    comment = models.ForeignKey('Comment', on_delete=models.CASCADE, null=True, blank=True)
+    message = models.CharField(max_length=255)
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Notification for {self.user.username} from {self.from_user.username}: {self.message}"
     
 # Opsiyonel: Etkinlik takvimi ileride eklemek istersen:
 # class Event(models.Model):

@@ -2,65 +2,78 @@
 {% block content %}
 
 <!-- Hero Section -->
-<section class="hero">
+<section class="hero text-center text-white d-flex align-items-center" style="background: linear-gradient(135deg,#0062E6,#33AEFF); min-height:60vh;">
   <div class="container px-3 px-lg-5">
-    <h1>Welcome to LearnSphere 🚀</h1>
-    <p class="lead">
+    <h1 class="display-4 fw-bold">Welcome to LearnSphere 🚀</h1>
+    <p class="lead mb-4">
       Explore courses, share knowledge &amp; connect with peers worldwide.
     </p>
-
-    <div>
+    <div class="d-flex justify-content-center gap-3">
       {% if not user.is_authenticated %}
         <a href="{% url 'register' %}" class="btn btn-lg btn-success">Get Started</a>
-        <a href="#features" class="btn btn-lg btn-outline-light">Discover All Features ⭐️</a>
+        <a href="#features" class="btn btn-lg btn-outline-light learn-more">Learn More ↓</a>
       {% else %}
         <a href="{% url 'dashboard' %}" class="btn btn-lg btn-success">Go to Dashboard</a>
-        <a href="{% url 'course_list' %}" class="btn btn-lg btn-outline-light">Browse Courses</a>
+        <a href="#features" class="btn btn-lg btn-outline-light learn-more">Learn More ↓</a>
       {% endif %}
     </div>
   </div>
 </section>
 
-<!-- Features Section -->
-<section id="features" class="features">
+<!-- Features / Flash-Cards Section -->
+<section id="features" class="features py-5 bg-light">
   <div class="container px-3 px-lg-5">
-    <h2 class="text-center">Why LearnSphere? 🤔</h2>
+    <h2 class="text-center mb-5">Why LearnSphere? 🤔</h2>
     <div class="row gy-4">
       <!-- 1. Course Library -->
       <div class="col-sm-6 col-lg-3">
         <div class="card text-center h-100 shadow-sm skeleton">
-          <i class="bi bi-journal-code"></i>
-          <h5 class="card-title mt-3">Course Library</h5>
-          <p class="card-text">Browse &amp; join a wide range of computer science courses.</p>
+          <div class="card-body d-flex flex-column align-items-center">
+            <i class="bi bi-journal-code fs-1 text-primary mb-3"></i>
+            <h5 class="card-title">Course Library</h5>
+            <p class="card-text flex-grow-1">
+              Browse &amp; join a wide range of computer science courses.
+            </p>
+          </div>
         </div>
       </div>
 
       <!-- 2. Collaborative Posts -->
       <div class="col-sm-6 col-lg-3">
         <div class="card text-center h-100 shadow-sm skeleton">
-          <i class="bi bi-chat-dots"></i>
-          <h5 class="card-title mt-3">Collaborative Posts</h5>
-          <p class="card-text">Share notes, code snippets &amp; resources seamlessly.</p>
+          <div class="card-body d-flex flex-column align-items-center">
+            <i class="bi bi-chat-dots fs-1 text-success mb-3"></i>
+            <h5 class="card-title">Collaborative Posts</h5>
+            <p class="card-text flex-grow-1">
+              Share notes, code snippets &amp; resources seamlessly.
+            </p>
+          </div>
         </div>
       </div>
 
       <!-- 3. Personal Analytics -->
       <div class="col-sm-6 col-lg-3">
         <div class="card text-center h-100 shadow-sm skeleton">
-          <i class="bi bi-bar-chart-line"></i>
-          <h5 class="card-title mt-3">Personal Analytics</h5>
-          <p class="card-text">Track your activity on your own dashboard.</p>
+          <div class="card-body d-flex flex-column align-items-center">
+            <i class="bi bi-bar-chart-line fs-1 text-warning mb-3"></i>
+            <h5 class="card-title">Personal Analytics</h5>
+            <p class="card-text flex-grow-1">
+              Track your activity on your own dashboard.
+            </p>
+          </div>
         </div>
       </div>
 
       <!-- 4. AI-Powered Insights -->
       <div class="col-sm-6 col-lg-3">
         <div class="card text-center h-100 shadow-sm skeleton">
-          <i class="bi bi-robot"></i>
-          <h5 class="card-title mt-3">AI-Powered Insights</h5>
-          <p class="card-text">
-            Auto-summarize PDFs, get content suggestions &amp; more 🤖📚.
-          </p>
+          <div class="card-body d-flex flex-column align-items-center">
+            <i class="bi bi-robot fs-1 text-info mb-3"></i>
+            <h5 class="card-title">AI-Powered Insights</h5>
+            <p class="card-text flex-grow-1">
+              Auto-summarize PDFs, get content suggestions &amp; more 🤖📚.
+            </p>
+          </div>
         </div>
       </div>
     </div>
@@ -74,7 +87,7 @@
       document.querySelectorAll('.features .card.skeleton').forEach(c => {
         c.classList.remove('skeleton');
       });
-    }, 1200);
+    }, 800);
   });
 </script>
 

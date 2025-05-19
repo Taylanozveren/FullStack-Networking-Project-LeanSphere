@@ -1,18 +1,20 @@
 # core/views.py
+# core/views.py
 
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import (
-    login as auth_login,
-    authenticate,
-    logout as auth_logout
-)
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import PermissionDenied
 from django.db.models import Q, Count
 
-from .forms import UserRegisterForm, PostForm, ProfileForm, CommentForm
-from .models import Profile, Discipline, Course, Post, Comment, Like
+from .models import (
+    Profile, Discipline, Course, Post, Comment, Like, Notification
+)
+from .forms import CommentForm, PostForm, ProfileForm, UserRegisterForm
+from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
+from django.core.exceptions import PermissionDenied
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+
 
 
 def home(request):
@@ -81,6 +83,7 @@ def course_list(request):
     return render(request, 'course_list.html', {'disciplines': disciplines})
 
 
+
 @login_required
 def course_detail(request, slug):
     course = get_object_or_404(Course, slug=slug)
@@ -99,11 +102,21 @@ def course_detail(request, slug):
         posts = all_posts
 
     is_joined = course in request.user.profile.joined_courses.all()
+
+    # Burada filtre seçeneklerini tanımlıyoruz:
+    filter_choices = [
+        ('all', 'All'),
+        ('pdf', 'PDF'),
+        ('image', 'Images'),
+        ('text', 'Text'),
+    ]
+
     return render(request, 'course_detail.html', {
         'course': course,
         'posts': posts,
         'is_joined': is_joined,
         'filter_type': filter_type,
+        'filter_choices': filter_choices,   # ← ekledik
     })
 
 
@@ -153,13 +166,39 @@ def post_detail(request, slug):
 @login_required
 def add_comment(request, post_id):
     post = get_object_or_404(Post, id=post_id)
+    user = request.user
+
     if request.method == 'POST':
         form = CommentForm(request.POST)
         if form.is_valid():
             comment = form.save(commit=False)
-            comment.user = request.user
+            comment.user = user
             comment.post = post
             comment.save()
+
+            # Bildirim oluştur
+            if post.author != user:
+                Notification.objects.create(
+                    user=post.author,
+                    from_user=user,
+                    post=post,
+                    comment=comment,
+                    message=f"{user.username} commented on your post “{post.title}”."
+                )
+        else:
+            comments = post.comments.all().order_by('created_at')
+            return render(request, '_comments_list.html', {
+                'comments': comments,
+                'user': user,
+                'form_errors': form.errors
+            })
+
+    comments = post.comments.all().order_by('created_at')
+    if request.headers.get('Hx-Request') or request.META.get('HTTP_HX_REQUEST'):
+        return render(request, '_comments_list.html', {
+            'comments': comments,
+            'user': user
+        })
     return redirect('post_detail', slug=post.slug)
 
 
@@ -197,31 +236,58 @@ def edit_comment(request, comment_id):
     comment = get_object_or_404(Comment, id=comment_id)
     if comment.user != request.user and not request.user.is_superuser:
         raise PermissionDenied
+
     if request.method == 'POST':
         form = CommentForm(request.POST, instance=comment)
         if form.is_valid():
             form.save()
+            comments = comment.post.comments.all().order_by('created_at')
+            # Eğer HTMX request ise güncel yorum listesini dön!
+            if request.headers.get('Hx-Request') or request.META.get('HTTP_HX_REQUEST'):
+                return render(request, '_comments_list.html', {
+                    'comments': comments,
+                    'user': request.user
+                })
             return redirect('post_detail', slug=comment.post.slug)
+        else:
+            # Hatalı form varsa formu inline dön (çok nadir)
+            if request.headers.get('Hx-Request') or request.META.get('HTTP_HX_REQUEST'):
+                return render(request, 'comment_form.html', {
+                    'form': form,
+                    'comment': comment
+                })
     else:
         form = CommentForm(instance=comment)
+        if request.headers.get('Hx-Request') or request.META.get('HTTP_HX_REQUEST'):
+            return render(request, 'comment_form.html', {
+                'form': form,
+                'comment': comment
+            })
+
     return render(request, 'comment_form.html', {
         'form': form,
-        'comment': comment,
+        'comment': comment
     })
-
-
+    
 @login_required
 def delete_comment(request, comment_id):
     comment = get_object_or_404(Comment, id=comment_id)
     if comment.user != request.user and not request.user.is_superuser:
         raise PermissionDenied
+    post = comment.post
     if request.method == 'POST':
-        post_slug = comment.post.slug
         comment.delete()
-        return redirect('post_detail', slug=post_slug)
-    return render(request, 'comment_confirm_delete.html', {
-        'comment': comment,
-    })
+        comments = post.comments.all().order_by('created_at')
+        if request.headers.get('Hx-Request') or request.META.get('HTTP_HX_REQUEST'):
+            return render(request, '_comments_list.html', {
+                'comments': comments,
+                'user': request.user
+            })
+        return redirect('post_detail', slug=post.slug)
+    # Silmeden önce “emin misin?” popup için partial döndür
+    if request.headers.get('Hx-Request') or request.META.get('HTTP_HX_REQUEST'):
+        return render(request, 'comment_confirm_delete.html', {'comment': comment})
+    return render(request, 'comment_confirm_delete.html', {'comment': comment})
 
 
 # --- GLOBAL SEARCH ---
@@ -244,10 +310,22 @@ def search(request):
 @login_required
 def toggle_like(request, post_id):
     post = get_object_or_404(Post, id=post_id)
-    if request.user in post.likes.all():
-        Like.objects.filter(user=request.user, post=post).delete()
+    user = request.user
+
+    # Eğer zaten beğenmişse beğeniyi sil, yoksa ekle
+    if user in post.likes.all():
+        Like.objects.filter(user=user, post=post).delete()
     else:
-        Like.objects.create(user=request.user, post=post)
+        Like.objects.create(user=user, post=post)
+        # Bildirim oluştur
+        if post.author != user:
+            Notification.objects.create(
+                user=post.author,
+                from_user=user,
+                post=post,
+                message=f"{user.username} liked your post “{post.title}”."
+            )
+
     return redirect('post_detail', slug=post.slug)
 
 
@@ -301,3 +379,33 @@ def dashboard(request):
         'course_stats': list(course_stats),
         'top5_posts': list(top5_posts),
     })
+    
+    # Yeni: Bildirimleri listeleyen view
+@login_required
+def notifications(request):
+    # 1) Önce: kullanıcının tüm bildirimlerini en yeni→eskiye çekiyoruz
+    notes = request.user.notifications.all()  # related_name="notifications"
+    # 2) Sonra: okunmamışları “okundu” olarak işaretliyoruz
+    request.user.notifications.filter(is_read=False).update(is_read=True)
+    # 3) Template’e geçiriyoruz
+    return render(request, 'notifications.html', {
+        'all_notifications': notes,
+    })
+    
+    
+@login_required
+@require_POST
+def mark_notification_read(request, pk):
+    note = get_object_or_404(Notification, pk=pk, user=request.user)
+    if not note.is_read:
+        note.is_read = True
+        note.save()
+    # Sadece status dönüyoruz, JS DOM’u güncelleyecek
+    return JsonResponse({'success': True})
+
+@login_required
+@require_POST
+def delete_notification(request, pk):
+    note = get_object_or_404(Notification, pk=pk, user=request.user)
+    note.delete()
+    return JsonResponse({'success': True})
