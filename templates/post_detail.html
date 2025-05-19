@@ -47,28 +47,19 @@
     </p>
   {% endif %}
 
-  <!-- Comments Bölümü -->
+  <!-- Comments Bölümü (AJAX & Partial Yorumlar) -->
   <hr>
   <h4>Comments</h4>
-  {% for comment in post.comments.all %}
-    <div class="mb-3 p-3 border rounded position-relative">
-      <strong>{{ comment.user.username }}</strong>
-      <small class="text-muted">— {{ comment.created_at|date:"M j, Y H:i" }}</small>
-      <p class="mb-1">{{ comment.content }}</p>
-
-      {% if user == comment.user or user.is_superuser %}
-        <div class="position-absolute top-0 end-0">
-          <a href="{% url 'edit_comment' comment.id %}" class="btn btn-sm btn-outline-secondary">Edit</a>
-          <a href="{% url 'delete_comment' comment.id %}" class="btn btn-sm btn-outline-danger">Delete</a>
-        </div>
-      {% endif %}
-    </div>
-  {% empty %}
-    <p class="text-muted">No comments yet.</p>
-  {% endfor %}
+  <div id="comments-section">
+    {% include '_comments_list.html' with comments=post.comments.all user=user %}
+  </div>
 
   {% if user.is_authenticated %}
-    <form method="post" action="{% url 'add_comment' post.id %}">
+    <form id="comment-form"
+          hx-post="{% url 'add_comment' post.id %}"
+          hx-target="#comments-section"
+          hx-swap="outerHTML"
+          class="mb-3">
       {% csrf_token %}
       {{ comment_form.as_p }}
       <button type="submit" class="btn btn-primary">Add Comment</button>

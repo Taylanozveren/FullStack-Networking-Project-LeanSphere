@@ -1,17 +1,25 @@
 {# templates/comment_form.html #}
-{% extends 'base.html' %}
-{% block content %}
-<div class="container mt-4">
-  <h4>
-    {% if comment.id %}Edit Comment{% else %}New Comment{% endif %}
-  </h4>
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
+<form 
+  method="post"
+  hx-post="{% url 'edit_comment' comment.id %}"
+  hx-target="#comments-section"
+  hx-swap="outerHTML"
+  class="mb-3 p-3 border rounded bg-white shadow-sm"
+>
+  {% csrf_token %}
+  {{ form.as_p }}
+  <div class="d-flex gap-2 mt-2">
     <button type="submit" class="btn btn-primary">
       {% if comment.id %}Update{% else %}Save{% endif %}
     </button>
-    <a href="{% url 'post_detail' comment.post.slug %}" class="btn btn-secondary ms-2">Cancel</a>
-  </form>
-</div>
-{% endblock %}
+    <button type="button" class="btn btn-secondary" onclick="htmx.trigger('#comments-section', 'refresh')">Cancel</button>
+  </div>
+</form>
+<script>
+  // Eğer Cancel'a basılırsa tüm yorumları AJAX ile geri getir:
+  document.addEventListener('htmx:afterSwap', function(evt) {
+    if (evt.detail.elt && evt.detail.elt.matches('.btn.btn-secondary')) {
+      htmx.ajax('GET', window.location.pathname, { target: '#comments-section', swap: 'outerHTML' });
+    }
+  });
+</script>

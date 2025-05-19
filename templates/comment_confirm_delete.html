@@ -1,13 +1,8 @@
 {# templates/comment_confirm_delete.html #}
-{% extends 'base.html' %}
-{% block content %}
-<div class="container mt-4">
+<form method="post">
+  {% csrf_token %}
   <h4>Are you sure you want to delete this comment?</h4>
   <p><em>{{ comment.content }}</em></p>
-  <form method="post">
-    {% csrf_token %}
-    <button type="submit" class="btn btn-danger">Yes, Delete</button>
-    <a href="{% url 'post_detail' comment.post.slug %}" class="btn btn-secondary ms-2">No</a>
-  </form>
-</div>
-{% endblock %}
+  <button type="submit" class="btn btn-danger">Yes, Delete</button>
+  <button type="button" class="btn btn-secondary ms-2" onclick="window.location.reload()">No</button>
+</form>

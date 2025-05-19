@@ -30,5 +30,10 @@ urlpatterns = [
     # --- Yeni eklenen: Search ---
     path('search/', views.search, name='search'),
     path('dashboard/', views.dashboard, name='dashboard'),
+    
+    path('posts/<int:post_id>/like/', views.toggle_like, name='toggle_like'),
+    path('notifications/', views.notifications, name='notifications'),
+    path('notifications/read/<int:pk>/',   views.mark_notification_read, name='mark_notification_read'),
+    path('notifications/delete/<int:pk>/', views.delete_notification,    name='delete_notification'),
 
 ]

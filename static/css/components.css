@@ -13,7 +13,6 @@
   padding: clamp(4rem, 15vw, 8rem) 1rem;
   text-align: center;
   clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
-  /* normal halde boşluk kalmasın diye margin reset */
   margin-top: 0;
 }
 .hero h1 {
@@ -75,3 +74,94 @@
   animation: shimmer 1.5s infinite;
   border-radius: .75rem;
 }
+
+/* ——— NEW: Courses horizontal carousel & styling ——— */
+.courses-scroll {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding: 1rem 0;
+}
+.courses-scroll .card {
+  flex: 0 0 300px;
+  scroll-snap-align: start;
+  transition: transform .3s, box-shadow .3s;
+}
+.courses-scroll .card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 0.75rem 1.5rem rgba(0,0,0,0.1);
+}
+
+/* Custom scrollbar */
+.courses-scroll::-webkit-scrollbar {
+  height: 8px;
+}
+.courses-scroll::-webkit-scrollbar-track {
+  background: var(--gray-light);
+}
+.courses-scroll::-webkit-scrollbar-thumb {
+  background-color: var(--primary);
+  border-radius: 4px;
+}
+
+/* ——— NEW: “Learn More” anchor button styling ——— */
+a.btn-outline-light.learn-more {
+  border-color: #fff;
+  color: #fff;
+  transition: background-color .3s, color .3s;
+}
+a.btn-outline-light.learn-more:hover {
+  background-color: rgba(255,255,255,0.2);
+  color: #fff;
+}
+
+/* ——— UTILITY: hide default focus outline and add custom ——— */
+:focus { outline: none; }
+.btn:focus {
+  box-shadow: 0 0 0 3px rgba(0,83,186,.4);
+}
+
+/* ——— NEW: Notifications dropdown styling ——— */
+.notifications-menu {
+  max-height: 300px;
+  min-width: 20rem;
+  overflow-y: auto;
+  padding: .25rem 0;
+}
+
+/* Unread: light-blue background, bold text */
+.notifications-menu .dropdown-item.unread {
+  background-color: rgba(0, 83, 186, 0.1);
+  font-weight: 600;
+}
+
+/* Read: white background, muted text */
+.notifications-menu .dropdown-item.read {
+  background-color: #fff;
+  color: #6c757d;
+}
+
+/* Hover highlight */
+.notifications-menu .dropdown-item:hover {
+  background-color: rgba(0, 83, 186, 0.15) !important;
+}
+
+/* New-dot icon spacing */
+.notifications-menu .bi-circle-fill {
+  margin-left: .5rem;
+}
+
+/* Scrollbar in notifications menu */
+.notifications-menu::-webkit-scrollbar {
+  width: 6px;
+}
+.notifications-menu::-webkit-scrollbar-track {
+  background: transparent;
+}
+.notifications-menu::-webkit-scrollbar-thumb {
+  background: rgba(0, 83, 186, 0.5);
+  border-radius: 3px;
+}
+
+/* ——— (Any other existing rules go above) ——— */
