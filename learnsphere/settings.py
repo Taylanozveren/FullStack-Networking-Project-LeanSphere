@@ -123,7 +123,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # ----------------- INTERNATIONALIZATION -----------------
 LANGUAGE_CODE = "en-us"
-TIME_ZONE = "UTC"
+TIME_ZONE = "Europe/Istanbul"
 USE_I18N = True
 USE_TZ = True
 
@@ -148,3 +148,8 @@ SOCIALACCOUNT_LOGIN_ON_GET = True
 # - Set your real ALLOWED_HOSTS in .env (example: '.onrender.com', 'yourdomain.com')
 # - Add secure session/cookie/ssl settings for deployment
 # - Set up logging config if needed
+
+# -------- Hugging Face Özetleme Ayarları --------
+HF_API_TOKEN       = env('HF_API_TOKEN')
+HF_SUMMARY_API_URL = env('HF_SUMMARY_API_URL')
+HF_EXPLAIN_API_URL = env('HF_EXPLAIN_API_URL')

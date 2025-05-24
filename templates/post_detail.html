@@ -7,7 +7,10 @@
   <p class="text-muted">
     by {{ post.author.username }} on {{ post.created_at|date:"F j, Y, g:i a" }}
   </p>
-  <div class="mb-3">{{ post.content|linebreaks }}</div>
+
+  <div class="mb-3">
+    {{ post.content|linebreaks }}
+  </div>
 
   {% if post.file %}
     <hr>
@@ -19,41 +22,75 @@
     </p>
   {% endif %}
 
+  {# ——— On-Demand AI Controls ——— #}
+  <div id="summary-controls" class="mb-3">
+    {% if post.file %}
+      <button
+        class="btn btn-sm btn-outline-secondary me-2"
+        hx-get="{% url 'post_summary' post.slug %}?type=pdf"
+        hx-target="#ai-summary-container"
+        hx-swap="innerHTML"
+        hx-indicator="#ai-loading">
+        Generate PDF Summary
+      </button>
+    {% endif %}
+
+    {% if post.content %}
+      {% if is_short_content %}
+        <button
+          class="btn btn-sm btn-outline-secondary"
+          hx-get="{% url 'post_summary' post.slug %}?type=text"
+          hx-target="#ai-summary-container"
+          hx-swap="innerHTML"
+          hx-indicator="#ai-loading">
+          Explain AI
+        </button>
+      {% else %}
+        <button
+          class="btn btn-sm btn-outline-secondary"
+          hx-get="{% url 'post_summary' post.slug %}?type=text"
+          hx-target="#ai-summary-container"
+          hx-swap="innerHTML"
+          hx-indicator="#ai-loading">
+          Generate Text Summary
+        </button>
+      {% endif %}
+    {% endif %}
+
+    <div id="ai-loading"
+         class="spinner-border text-primary ms-2 d-none"
+         role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  {# ——— HTMX ile gelen AI partial buraya gelecek ——— #}
+  <div id="ai-summary-container" class="my-4"></div>
+
   {% if request.user == post.author %}
     <hr>
     <a href="{% url 'edit_post' post.slug %}" class="btn btn-outline-primary">Edit Post</a>
     <a href="{% url 'delete_post' post.slug %}" class="btn btn-outline-danger ms-2">Delete Post</a>
   {% endif %}
 
-  <!-- Like Toggle Bölümü -->
-  <hr>
-  {% if user.is_authenticated %}
-    <form method="post" action="{% url 'toggle_like' post.id %}">
-      {% csrf_token %}
-      {% if user in post.likes.all %}
-        <button type="submit" class="btn btn-sm btn-outline-danger">
-          ❤️ Unlike
-        </button>
-      {% else %}
-        <button type="submit" class="btn btn-sm btn-outline-primary">
-          🤍 Like
-        </button>
-      {% endif %}
-      <span class="ms-2">{{ post.likes.count }} likes</span>
-    </form>
-  {% else %}
-    <p class="text-muted">
-      You must <a href="{% url 'login' %}">log in</a> to like posts.
-    </p>
-  {% endif %}
+  {# templates/post_detail.html içinden beğeni kısmı #}
+<hr>
 
-  <!-- Comments Bölümü (AJAX & Partial Yorumlar) -->
+{% if user.is_authenticated %}
+  {% include 'partials/like_form.html' with post=post user=user %}
+{% else %}
+  <p class="text-muted">
+    You must <a href="{% url 'login' %}">log in</a> to like posts.
+  </p>
+{% endif %}
+
   <hr>
+
+  {# --- Comments --- #}
   <h4>Comments</h4>
   <div id="comments-section">
     {% include '_comments_list.html' with comments=post.comments.all user=user %}
   </div>
-
   {% if user.is_authenticated %}
     <form id="comment-form"
           hx-post="{% url 'add_comment' post.id %}"

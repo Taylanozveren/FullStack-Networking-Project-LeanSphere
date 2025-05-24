@@ -35,5 +35,6 @@ urlpatterns = [
     path('notifications/', views.notifications, name='notifications'),
     path('notifications/read/<int:pk>/',   views.mark_notification_read, name='mark_notification_read'),
     path('notifications/delete/<int:pk>/', views.delete_notification,    name='delete_notification'),
-
+    path('posts/<slug:slug>/summary/', views.post_summary, name='post_summary'),
+    path('posts/<slug:slug>/explain/',      views.post_explain, name='post_explain'),
 ]

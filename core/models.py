@@ -61,14 +61,27 @@ def save_user_profile(sender, instance, **kwargs):
     instance.profile.save()
 
 class Post(models.Model):
-    course     = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="posts")
-    author     = models.ForeignKey(User, on_delete=models.CASCADE, related_name="posts")
-    title      = models.CharField(max_length=150)
-    content    = models.TextField(blank=True)
-    file       = models.FileField(upload_to="uploads/", blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    slug       = models.SlugField(unique=True, editable=False)
-    likes      = models.ManyToManyField(User, through="Like", related_name="liked_posts", blank=True)
+    course       = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="posts")
+    author       = models.ForeignKey(User, on_delete=models.CASCADE, related_name="posts")
+    title        = models.CharField(max_length=150)
+    content      = models.TextField(blank=True)
+    file         = models.FileField(upload_to="uploads/", blank=True, null=True)
+
+    # ————— Yeni alan: AI ile oluşturulacak özet metni
+    pdf_summary  = models.TextField(
+        blank=True,
+        null=True,
+        help_text="HuggingFace AI ile oluşturulan PDF/metin özeti"
+    )
+
+    created_at   = models.DateTimeField(auto_now_add=True)
+    slug         = models.SlugField(unique=True, editable=False)
+    likes        = models.ManyToManyField(
+                      User,
+                      through="Like",
+                      related_name="liked_posts",
+                      blank=True
+                   )
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -78,6 +91,7 @@ class Post(models.Model):
 
     def __str__(self):
         return self.title
+
 
 class Comment(models.Model):
     post       = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="comments")

@@ -1,0 +1,39 @@
+{# templates/partials/ai_summary.html #}
+{% if error %}
+  <div class="alert alert-warning">{{ error }}</div>
+
+{% elif summary %}
+  <div id="ai-summary-widget" class="mb-3">
+    <div id="ai-summary-content" class="card mb-2">
+      <div class="card-header">
+        <strong>{{ title }}</strong>
+      </div>
+      <div class="card-body">
+        <p>{{ summary }}</p>
+      </div>
+      <div class="card-footer text-muted">
+        <small>Generated at {{ now|date:"H:i:s" }}</small>
+      </div>
+    </div>
+    <button id="toggle-summary-btn" class="btn btn-sm btn-outline-secondary">
+      Hide {{ title }}
+    </button>
+  </div>
+
+  <script>
+    (function(){
+      const content = document.getElementById('ai-summary-content');
+      const btn     = document.getElementById('toggle-summary-btn');
+      btn.addEventListener('click', () => {
+        const hidden = content.style.display === 'none';
+        content.style.display = hidden ? '' : 'none';
+        btn.textContent = hidden
+          ? 'Hide {{ title }}'
+          : 'Show {{ title }}';
+      });
+    })();
+  </script>
+
+{% else %}
+  <div class="text-muted">No summary available.</div>
+{% endif %}
