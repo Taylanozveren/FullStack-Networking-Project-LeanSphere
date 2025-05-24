@@ -27,4 +27,7 @@ urlpatterns = [
 ]
 
 if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    # 1) Django admin ve tüm static dosyalarınız (/static/...) burada sunulsun
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    # 2) Media dosyalarınız (/media/...) burada sunulsun
+    urlpatterns += static(settings.MEDIA_URL,  document_root=settings.MEDIA_ROOT)
