@@ -12,6 +12,7 @@ urlpatterns = [
     path('logout/',   views.logout_view, name='logout'),
     path('profile/',       views.profile_view,   name='profile'),
     path('profile/edit/',  views.edit_profile,   name='edit_profile'),
+    path('profile/change-username/', views.change_username, name='change_username'),
 
     # courses & posts
     path('courses/',                       views.course_list,   name='course_list'),
@@ -37,4 +38,5 @@ urlpatterns = [
     path('notifications/delete/<int:pk>/', views.delete_notification,    name='delete_notification'),
     path('posts/<slug:slug>/summary/', views.post_summary, name='post_summary'),
     path('posts/<slug:slug>/explain/',      views.post_explain, name='post_explain'),
+    path('subscribe-newsletter/', views.subscribe_newsletter, name='subscribe_newsletter'),
 ]

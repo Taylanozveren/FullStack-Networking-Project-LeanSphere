@@ -1,0 +1,108 @@
+LearnSphere – Proje Özeti & Cursor Talimatı
+(Bu metni Cursor editörüne yapıştırın. Kod-yardımcısı, mevcut yapıyı bozmadan geliştirme ve canlıya taşıma adımlarında bu rehbere göre hareket etsin.)
+
+1 · Projenin Amacı
+LearnSphere, Bilgisayar Bilimleri öğrencilerinin ders notu, PDF, kod parçası ve proje raporlarını paylaşabildiği küçük ölçekli sosyal-öğrenme platformudur.
+Hedefler:
+
+Eş-öğrenmeyi hızlandırmak – içerik yükle, yorumla, beğen.
+
+Gerçek-zamanlı etkileşim – HTMX/AJAX ile tam sayfa yenileme olmadan hareketli deneyim.
+
+AI entegrasyonu – PDF ve uzun metinleri Hugging Face ile anında özetleyip okunabilirlik sağlamak.
+
+2 · Nasıl Çalışıyor?
+Katman	Kullanılan Teknolojiler
+Frontend	Bootstrap 5, Vanilla JS, HTMX (parçalı yenileme)
+Backend	Django 5 (MTV), Hugging Face REST çağrıları
+Veritabanı	Dev: SQLite ‹switch-ready PostgreSQL›
+AI	facebook/bart-large-cnn modeli ile özetleme
+Dağıtım	Render.com (Gunicorn + WhiteNoise) · GitHub Actions (plan)
+
+Akış: Kullanıcı Google/GitHub ile giriş → kurs seçer → Post oluşturur → diğer içerikleri beğenir/yorumlar.
+
+Beğeni/Yorum HTMX ile anında güncellenir.
+
+Post detay sayfasındaki AI butonları, içeriği Hugging Face'e gönderir ➜ özet kartında sonuç döner.
+
+Dashboard'da Chart.js grafikler kişisel istatistikleri gösterir.
+
+3 · Tamamlanan Milestone'lar
+MS	İçerik	Durum
+M1	Sosyal giriş, Profil, Kurs & Post CRUD	✔️
+M2	Yorum & Beğeni + Bildirim sistemi	✔️
+M3	Global arama & filtre	✔️
+M4	Dashboard & Analitik (Chart.js)	✔️
+M5	AI metin + PDF özetleme entegrasyonu	✔️
+
+Admin paneli stil sorunu giderildi; içerik moderasyonu hazır.
+
+4 · Kodun Mevcut Durumu
+Modeller: User → Profile → Course → Post → Comment / Like
+
+Views: post_list, post_detail, post_summary (text / pdf)
+
+Template'ler: base.html, kurs/post sayfaları, partials/ai_summary.html
+
+Statik: css/base.css, css/components.css (dark-mode değişkenleri hazır)
+
+JS: static/js/ui.js – collapse, toast, HTMX yardımcıları
+
+Test Taslağı: Auth, Like, Post CRUD (pytest)
+
+5 · Sıradaki Hedefler
+Milestone 6 – UI / UX İyileştirmeleri
+AI Özet Kartı
+
+Collapsable yapı, yükleme spinner'ı, buton disable
+
+"Kopyala" & ".txt kaydet" + toast bildirimi
+
+Tema Switch – Dark / Light (CSS Variables + localStorage)
+
+Toast Bildirimleri – Like, yorum, AI işlemleri için
+
+Drag-and-Drop Upload – Dropzone.js entegrasyonu
+
+Responsive Rötuşlar – mobil navbar, spacing
+
+Milestone 7 – Yayın & CI/CD
+PostgreSQL'e geçiş (Render)
+
+Gunicorn + WhiteNoise ayarı
+
+GitHub Actions ile otomatik deploy
+
+Milestone 8 – Dokümantasyon & Sunum
+README + API Dokümanı
+
+Loom videosu / GIF
+
+PPT: Problem → Çözüm → Demo
+
+6 · Projede Hazır Ortam (Cursor'ın Bilmesi Gerekenler)
+Öğe	Detay
+venv/	Projede hazır; gerekli PyPI paketleri (Django 5, HTMX helper, requests, python-environ, whitenoise, etc.) kurulu. Cursor yalnızca mevcut venv'i kullansın, yeni sanal ortam oluşturmasın.
+.env	Hugging Face API anahtarları, Google / GitHub OAuth bilgileri, DEBUG ve SECRET_KEY burada tanımlı. Cursor bu bilgileri değiştirmesin; .env.example dosyası eklemesi gerekiyorsa sadece placeholder bırakabilir.
+Statik Dizini	static/ ve staticfiles/ yapısı hazır (collectstatic çalışıyor).
+Backend Yapısı	Mevcut view / URL isimlerini değiştirmek yasak. Yeni özellikler partial / utility ekleyerek genişletilsin.
+
+7 · Cursor'a Talimat
+Var olan mimariyi bozma, model eklemeyle migrate zorunluluğu yaratma.
+
+Bootstrap 5 + Vanilla JS + HTMX kullanmışız
+
+Yeni JS/CSS ekleyecekse static/js/ui.js veya static/css/components.css içinde düzenli comment bloklarıyla eklesin.
+
+Kod parçalarına // Cursor: veya {# Cursor: ... #} açıklaması ekle.
+
+Canlıya geçiş için Render dosyası (render.yaml) veya GitHub Actions workflow'u (python-app.yml) önersin fakat var olan dosyaları kaldırmasın.
+
+8 · Beklenen Çıktı
+UI/UX iyileştirmeleri tamamlanmış, hatasız çalışan bir demo.
+
+DEBUG=False + WhiteNoise + PostgreSQL veya mevcut SQlite'ı bozmayabiliriz (default DJANGO) ayar dosyaları hazırlanmış.
+
+GitHub Actions pipeline dosyası eklenmiş, ilk deploy Render'da yeşil.
+
+README'de kurulum & canlı link, video ve sunum materyali referansları. 

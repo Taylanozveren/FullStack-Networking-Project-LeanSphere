@@ -8,15 +8,19 @@
     class="d-inline"
   >
     {% csrf_token %}
-    {% if user in post.likes.all %}
-      <button type="submit" class="btn btn-sm btn-outline-danger">
-        ❤️ Unlike
-      </button>
-    {% else %}
-      <button type="submit" class="btn btn-sm btn-outline-primary">
-        🤍 Like
-      </button>
-    {% endif %}
-    <span class="ms-2">{{ post.likes.count }} likes</span>
+    <div class="d-flex align-items-center gap-3">
+      {% if user in post.likes.all %}
+        <button type="submit" class="btn btn-outline-danger">
+          <i class="bi bi-heart-fill"></i> Unlike
+        </button>
+      {% else %}
+        <button type="submit" class="btn btn-outline-primary">
+          <i class="bi bi-heart"></i> Like
+        </button>
+      {% endif %}
+      <span class="text-muted">
+        <strong>{{ post.likes.count }}</strong> like{{ post.likes.count|pluralize }}
+      </span>
+    </div>
   </form>
 </div>

@@ -1,94 +1,291 @@
 {% extends 'base.html' %}
+{% load static %}
+
 {% block content %}
-
 <!-- Hero Section -->
-<section class="hero text-center text-white d-flex align-items-center" style="background: linear-gradient(135deg,#0062E6,#33AEFF); min-height:60vh;">
-  <div class="container px-3 px-lg-5">
-    <h1 class="display-4 fw-bold">Welcome to LearnSphere 🚀</h1>
-    <p class="lead mb-4">
-      Explore courses, share knowledge &amp; connect with peers worldwide.
-    </p>
-    <div class="d-flex justify-content-center gap-3">
-      {% if not user.is_authenticated %}
-        <a href="{% url 'register' %}" class="btn btn-lg btn-success">Get Started</a>
-        <a href="#features" class="btn btn-lg btn-outline-light learn-more">Learn More ↓</a>
-      {% else %}
-        <a href="{% url 'dashboard' %}" class="btn btn-lg btn-success">Go to Dashboard</a>
-        <a href="#features" class="btn btn-lg btn-outline-light learn-more">Learn More ↓</a>
-      {% endif %}
+<section class="welcome-section position-relative overflow-hidden">
+    <div class="container min-vh-100 d-flex align-items-center">
+        <div class="hero-content text-center mx-auto" style="max-width: 800px;">
+            <h1 class="display-2 fw-bold mb-4 animate-up">
+                Welcome to 
+                <div class="text-gradient display-1 my-2">LearnSphere</div>
+                <div class="d-flex align-items-center justify-content-center">
+                    <span class="rocket-icon animate-float" style="font-size: 3rem;">🚀</span>
+                </div>
+            </h1>
+            <p class="lead mb-5 text-muted animate-up-delay" style="font-size: 1.3rem; max-width: 600px; margin: 0 auto;">
+                Explore courses, share knowledge & connect with peers worldwide.
+            </p>
+            <div class="d-flex justify-content-center gap-4 animate-up-delay-2">
+                <a href="{% url 'dashboard' %}" class="btn btn-lg btn-get-started">
+                    <i class="bi bi-rocket-takeoff me-2"></i>Get Started
+                </a>
+                <a href="#features" class="btn btn-lg btn-learn-more">
+                    Learn More <i class="bi bi-arrow-down ms-2"></i>
+                </a>
+            </div>
+            
+            <!-- Floating Elements -->
+            <div class="position-absolute" style="top: 15%; left: 10%; animation: float 6s ease-in-out infinite;">
+                <i class="bi bi-code-square text-white opacity-25" style="font-size: 3rem;"></i>
+            </div>
+            <div class="position-absolute" style="bottom: 20%; right: 10%; animation: float 8s ease-in-out infinite;">
+                <i class="bi bi-braces text-white opacity-25" style="font-size: 4rem;"></i>
+            </div>
+            <div class="position-absolute" style="top: 30%; right: 20%; animation: float 7s ease-in-out infinite;">
+                <i class="bi bi-cpu text-white opacity-25" style="font-size: 2.5rem;"></i>
+            </div>
+        </div>
     </div>
-  </div>
+    
+    <!-- Animated Background -->
+    <div class="position-absolute top-0 start-0 w-100 h-100 z-n1">
+        <div class="hero-bg"></div>
+        <div class="hero-gradient"></div>
+    </div>
 </section>
 
-<!-- Features / Flash-Cards Section -->
-<section id="features" class="features py-5 bg-light">
-  <div class="container px-3 px-lg-5">
-    <h2 class="text-center mb-5">Why LearnSphere? 🤔</h2>
-    <div class="row gy-4">
-      <!-- 1. Course Library -->
-      <div class="col-sm-6 col-lg-3">
-        <div class="card text-center h-100 shadow-sm skeleton">
-          <div class="card-body d-flex flex-column align-items-center">
-            <i class="bi bi-journal-code fs-1 text-primary mb-3"></i>
-            <h5 class="card-title">Course Library</h5>
-            <p class="card-text flex-grow-1">
-              Browse &amp; join a wide range of computer science courses.
+<!-- Features Section -->
+<section id="features" class="features-section py-6">
+    <div class="container">
+        <div class="text-center mb-5">
+            <span class="badge bg-primary-soft text-primary mb-3 px-3 py-2">Why Choose Us</span>
+            <h2 class="display-5 fw-bold mb-3">
+                Discover the LearnSphere
+                <span class="text-gradient">Difference</span>
+            </h2>
+            <p class="text-muted lead mx-auto" style="max-width: 600px;">
+                Experience a modern learning platform designed for computer science students and enthusiasts.
             </p>
-          </div>
         </div>
-      </div>
 
-      <!-- 2. Collaborative Posts -->
-      <div class="col-sm-6 col-lg-3">
-        <div class="card text-center h-100 shadow-sm skeleton">
-          <div class="card-body d-flex flex-column align-items-center">
-            <i class="bi bi-chat-dots fs-1 text-success mb-3"></i>
-            <h5 class="card-title">Collaborative Posts</h5>
-            <p class="card-text flex-grow-1">
-              Share notes, code snippets &amp; resources seamlessly.
-            </p>
-          </div>
-        </div>
-      </div>
+        <div class="row g-4 justify-content-center">
+            <!-- Course Library -->
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-card h-100 p-4 text-center hover-lift">
+                    <div class="feature-icon-wrapper mb-4">
+                        <div class="feature-icon bg-primary-soft text-primary">
+                            <i class="bi bi-book display-6"></i>
+                        </div>
+                    </div>
+                    <h3 class="h5 mb-3 text-dark">Course Library</h3>
+                    <p class="text-muted mb-0">
+                        Access a curated collection of computer science courses.
+                    </p>
+                </div>
+            </div>
 
-      <!-- 3. Personal Analytics -->
-      <div class="col-sm-6 col-lg-3">
-        <div class="card text-center h-100 shadow-sm skeleton">
-          <div class="card-body d-flex flex-column align-items-center">
-            <i class="bi bi-bar-chart-line fs-1 text-warning mb-3"></i>
-            <h5 class="card-title">Personal Analytics</h5>
-            <p class="card-text flex-grow-1">
-              Track your activity on your own dashboard.
-            </p>
-          </div>
-        </div>
-      </div>
+            <!-- Collaborative Learning -->
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-card h-100 p-4 text-center hover-lift">
+                    <div class="feature-icon-wrapper mb-4">
+                        <div class="feature-icon bg-success-soft text-success">
+                            <i class="bi bi-people display-6"></i>
+                        </div>
+                    </div>
+                    <h3 class="h5 mb-3 text-dark">Collaborative Learning</h3>
+                    <p class="text-muted mb-0">
+                        Share knowledge and learn together with your peers.
+                    </p>
+                </div>
+            </div>
 
-      <!-- 4. AI-Powered Insights -->
-      <div class="col-sm-6 col-lg-3">
-        <div class="card text-center h-100 shadow-sm skeleton">
-          <div class="card-body d-flex flex-column align-items-center">
-            <i class="bi bi-robot fs-1 text-info mb-3"></i>
-            <h5 class="card-title">AI-Powered Insights</h5>
-            <p class="card-text flex-grow-1">
-              Auto-summarize PDFs, get content suggestions &amp; more 🤖📚.
-            </p>
-          </div>
+            <!-- Smart Analytics -->
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-card h-100 p-4 text-center hover-lift">
+                    <div class="feature-icon-wrapper mb-4">
+                        <div class="feature-icon bg-warning-soft text-warning">
+                            <i class="bi bi-graph-up display-6"></i>
+                        </div>
+                    </div>
+                    <h3 class="h5 mb-3 text-dark">Smart Analytics</h3>
+                    <p class="text-muted mb-0">
+                        Track your progress with detailed insights and metrics.
+                    </p>
+                </div>
+            </div>
+
+            <!-- AI Support -->
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-card h-100 p-4 text-center hover-lift">
+                    <div class="feature-icon-wrapper mb-4">
+                        <div class="feature-icon bg-info-soft text-info">
+                            <i class="bi bi-robot display-6"></i>
+                        </div>
+                    </div>
+                    <h3 class="h5 mb-3 text-dark">AI Support</h3>
+                    <p class="text-muted mb-0">
+                        Get intelligent assistance and content recommendations.
+                    </p>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
 </section>
 
-<!-- Skeleton removal script -->
+<!-- Stats Section -->
+<section class="stats-section py-6 bg-light">
+    <div class="container">
+        <div class="row g-4 text-center justify-content-center">
+            <div class="col-md-4">
+                <div class="stat-card p-4 bg-white rounded-4 hover-lift">
+                    <div class="stat-icon text-primary mb-3">
+                        <i class="bi bi-collection-play display-5"></i>
+                    </div>
+                    <h3 class="display-4 fw-bold text-gradient mb-2" data-count="6">6+</h3>
+                    <p class="text-muted mb-0">Active Courses</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card p-4 bg-white rounded-4 hover-lift">
+                    <div class="stat-icon text-success mb-3">
+                        <i class="bi bi-journal-text display-5"></i>
+                    </div>
+                    <h3 class="display-4 fw-bold text-gradient mb-2" data-count="50">50+</h3>
+                    <p class="text-muted mb-0">Learning Resources</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card p-4 bg-white rounded-4 hover-lift">
+                    <div class="stat-icon text-info mb-3">
+                        <i class="bi bi-clock-history display-5"></i>
+                    </div>
+                    <h3 class="display-4 fw-bold text-gradient mb-2">24/7</h3>
+                    <p class="text-muted mb-0">AI Support</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Hero Section */
+    .welcome-section {
+        background: var(--gray-50);
+        overflow: hidden;
+    }
+
+    .hero-bg {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='rgba(0,0,0,0.03)' fill-rule='evenodd'/%3E%3C/svg%3E");
+        opacity: 0.5;
+    }
+
+    .hero-gradient {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.1) 0%, rgba(var(--accent-rgb), 0.1) 100%);
+    }
+
+    /* Feature Cards */
+    .feature-icon-wrapper {
+        position: relative;
+        display: inline-block;
+    }
+
+    .feature-icon {
+        width: 80px;
+        height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        margin: 0 auto;
+        position: relative;
+        z-index: 1;
+    }
+
+    .bg-primary-soft { background-color: rgba(var(--primary-rgb), 0.1); }
+    .bg-success-soft { background-color: rgba(var(--success-500), 0.1); }
+    .bg-warning-soft { background-color: rgba(var(--warning-500), 0.1); }
+    .bg-info-soft { background-color: rgba(var(--info-500), 0.1); }
+
+    /* Spacing Utility */
+    .py-6 { padding-top: 4rem; padding-bottom: 4rem; }
+    @media (min-width: 992px) {
+        .py-6 { padding-top: 6rem; padding-bottom: 6rem; }
+    }
+
+    /* Animations */
+    .animate-float {
+        animation: float 3s ease-in-out infinite;
+        display: inline-block;
+    }
+
+    @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+        100% { transform: translateY(0px); }
+    }
+
+    .stat-card {
+        transition: var(--transition-all);
+    }
+
+    .stat-icon {
+        transition: transform 0.3s ease;
+    }
+
+    .stat-card:hover .stat-icon {
+        transform: scale(1.1);
+    }
+
+    /* Badge Styles */
+    .badge {
+        font-weight: 500;
+        letter-spacing: 0.5px;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => {
-      document.querySelectorAll('.features .card.skeleton').forEach(c => {
-        c.classList.remove('skeleton');
-      });
-    }, 800);
-  });
-</script>
+    // Smooth scroll
+    document.querySelector('a[href="#features"]').addEventListener('click', function(e) {
+        e.preventDefault();
+        document.querySelector('#features').scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
 
+    // Stats counter animation
+    function animateCounter(element) {
+        const target = parseInt(element.getAttribute('data-count'));
+        const duration = 2000;
+        const step = target / (duration / 16);
+        let current = 0;
+
+        const timer = setInterval(() => {
+            current += step;
+            if (current >= target) {
+                element.textContent = target + '+';
+                clearInterval(timer);
+            } else {
+                element.textContent = Math.floor(current) + '+';
+            }
+        }, 16);
+    }
+
+    // Intersection Observer for stats animation
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const counters = entry.target.querySelectorAll('[data-count]');
+                counters.forEach(counter => animateCounter(counter));
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.5 });
+
+    // Observe stats section
+    document.addEventListener('DOMContentLoaded', () => {
+        const statsSection = document.querySelector('.stats-section');
+        if (statsSection) observer.observe(statsSection);
+    });
+</script>
 {% endblock %}

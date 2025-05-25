@@ -4,22 +4,46 @@
   hx-post="{% url 'edit_comment' comment.id %}"
   hx-target="#comments-section"
   hx-swap="outerHTML"
-  class="mb-3 p-3 border rounded bg-white shadow-sm"
+  class="mb-3"
 >
   {% csrf_token %}
-  {{ form.as_p }}
-  <div class="d-flex gap-2 mt-2">
+  <div class="mb-3">
+    <label for="{{ form.content.id_for_label }}" class="form-label">
+      {% if comment.id %}Edit your comment{% else %}Write a comment{% endif %}
+    </label>
+    <textarea name="content" 
+              id="{{ form.content.id_for_label }}" 
+              class="form-control {% if form.content.errors %}is-invalid{% endif %}"
+              rows="3"
+              placeholder="Write your comment here...">{% if comment.content %}{{ comment.content }}{% endif %}</textarea>
+    {% if form.content.errors %}
+      <div class="invalid-feedback">
+        {{ form.content.errors|join:", " }}
+      </div>
+    {% endif %}
+  </div>
+  <div class="d-flex gap-2">
     <button type="submit" class="btn btn-primary">
-      {% if comment.id %}Update{% else %}Save{% endif %}
+      <i class="bi bi-send"></i>
+      {% if comment.id %}Update{% else %}Post{% endif %}
     </button>
-    <button type="button" class="btn btn-secondary" onclick="htmx.trigger('#comments-section', 'refresh')">Cancel</button>
+    <button type="button" 
+            class="btn btn-outline-secondary"
+            hx-get="{% url 'post_detail' comment.post.slug %}"
+            hx-target="#comments-section"
+            hx-swap="outerHTML">
+      Cancel
+    </button>
   </div>
 </form>
+
 <script>
-  // Eğer Cancel'a basılırsa tüm yorumları AJAX ile geri getir:
+  // Focus the textarea when form loads
   document.addEventListener('htmx:afterSwap', function(evt) {
-    if (evt.detail.elt && evt.detail.elt.matches('.btn.btn-secondary')) {
-      htmx.ajax('GET', window.location.pathname, { target: '#comments-section', swap: 'outerHTML' });
+    const textarea = evt.detail.target.querySelector('textarea');
+    if (textarea) {
+      textarea.focus();
+      textarea.setSelectionRange(textarea.value.length, textarea.value.length);
     }
   });
 </script>

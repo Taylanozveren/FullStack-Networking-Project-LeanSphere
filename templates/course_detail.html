@@ -4,35 +4,43 @@
 {% block content %}
 <div class="container px-3 px-lg-5 py-5">
 
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h2>{{ course.code }} – {{ course.title }}</h2>
+  <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
+      <h2 class="mb-1">{{ course.code }} – {{ course.title }}</h2>
+      <p class="text-muted mb-0">{{ course.description }}</p>
+    </div>
+    <div class="d-flex gap-2">
       {% if is_joined %}
-        <a href="{% url 'create_post' course.slug %}" class="btn btn-primary me-2">Add Post</a>
+        <a href="{% url 'create_post' course.slug %}" class="btn btn-primary">
+          <i class="bi bi-plus-lg"></i> Add Post
+        </a>
         <form action="{% url 'join_course' course.slug %}" method="post" style="display:inline;">
           {% csrf_token %}
-          <button class="btn btn-outline-danger">Leave</button>
+          <button class="btn btn-outline-danger">
+            <i class="bi bi-box-arrow-right"></i> Leave
+          </button>
         </form>
       {% else %}
         <form action="{% url 'join_course' course.slug %}" method="post" style="display:inline;">
           {% csrf_token %}
-          <button class="btn btn-outline-success">Join</button>
+          <button class="btn btn-success">
+            <i class="bi bi-box-arrow-in-right"></i> Join Course
+          </button>
         </form>
       {% endif %}
     </div>
   </div>
 
-  <p class="mb-4">{{ course.description }}</p>
-
   <!-- FILTER -->
   <div class="mb-4">
-    <span class="fw-semibold me-2">Filter:</span>
-    {% for t, label in filter_choices %}
-      <a href="?filter={{ t }}"
-         class="btn btn-sm {% if filter_type == t %}btn-primary{% else %}btn-outline-primary{% endif %} me-1">
-        {{ label }}
-      </a>
-    {% endfor %}
+    <div class="btn-group" role="group">
+      {% for t, label in filter_choices %}
+        <a href="?filter={{ t }}"
+           class="btn {% if filter_type == t %}btn-primary{% else %}btn-outline-primary{% endif %}">
+          {{ label }}
+        </a>
+      {% endfor %}
+    </div>
   </div>
 
   <!-- POSTS -->
@@ -40,30 +48,43 @@
     {% if posts %}
       {% for post in posts %}
         <div class="col-12 col-md-6">
-          <div class="card shadow-sm h-100">
+          <div class="card post-card shadow-sm h-100">
             <div class="card-body d-flex flex-column">
-              <div class="d-flex align-items-center mb-2">
-                <img src="{{ post.author.profile.avatar.url }}" class="rounded-circle me-2" width="32" height="32" alt="avatar">
-                <div>
-                  <strong>{{ post.author.username }}</strong><br>
-                  <small class="text-muted">{{ post.created_at|date:"M j, Y H:i" }}</small>
+              <!-- Author Info -->
+              <div class="d-flex align-items-center">
+                <div class="avatar-wrapper">
+                  <img src="{{ post.author.profile.avatar.url }}" alt="avatar">
+                </div>
+                <div class="ms-2">
+                  <strong>{{ post.author.username }}</strong>
+                  <div class="post-meta">{{ post.created_at|date:"M j, Y H:i" }}</div>
                 </div>
               </div>
+              
+              <!-- Post Content -->
               <h5 class="card-title">{{ post.title }}</h5>
-              <p class="card-text text-muted mb-3">{{ post.content|truncatechars:100 }}</p>
+              <p class="card-text">{{ post.content|truncatechars:150 }}</p>
+              
               {% if post.file %}
-                <p>
-                  <a href="{{ post.file.url }}" target="_blank" class="card-link">
-                    <i class="bi bi-download"></i> Download Attachment
-                  </a>
-                </p>
+                <a href="{{ post.file.url }}" target="_blank" class="attachment-link mb-3">
+                  <i class="bi bi-paperclip"></i>
+                  <span>{{ post.file.name|slice:"8:"|truncatechars:25 }}</span>
+                </a>
               {% endif %}
+              
+              <!-- Post Stats & Actions -->
               <div class="mt-auto d-flex justify-content-between align-items-center">
-                <div>
-                  <i class="bi bi-chat-left-text"></i> {{ post.comments.count }} 
-                  <i class="bi bi-heart ms-3"></i> {{ post.likes.count }}
+                <div class="post-stats">
+                  <span>
+                    <i class="bi bi-chat-left-text"></i>
+                    {{ post.comments.count }}
+                  </span>
+                  <span>
+                    <i class="bi bi-heart"></i>
+                    {{ post.likes.count }}
+                  </span>
                 </div>
-                <a href="{% url 'post_detail' post.slug %}" class="btn btn-sm btn-outline-secondary">
+                <a href="{% url 'post_detail' post.slug %}" class="btn btn-view btn-outline-primary">
                   View Details
                 </a>
               </div>
@@ -72,7 +93,15 @@
         </div>
       {% endfor %}
     {% else %}
-      <p class="text-muted">No posts yet for this course.</p>
+      <div class="col-12">
+        <div class="alert alert-info">
+          <i class="bi bi-info-circle me-2"></i>
+          No posts yet for this course.
+          {% if is_joined %}
+            <a href="{% url 'create_post' course.slug %}" class="alert-link">Create the first post!</a>
+          {% endif %}
+        </div>
+      </div>
     {% endif %}
   </div>
 

@@ -11,9 +11,11 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.utils import timezone
+import logging
+from django.core.mail import send_mail
 
-from .models import Profile, Discipline, Course, Post, Comment, Like, Notification
-from .forms import CommentForm, PostForm, ProfileForm, UserRegisterForm
+from .models import Profile, Discipline, Course, Post, Comment, Like, Notification, User
+from .forms import CommentForm, PostForm, ProfileForm, UserRegisterForm, NewsletterForm
 from .utils import extract_text_from_pdf, chunk_text, generate_summary, generate_explanation
 
 
@@ -57,9 +59,22 @@ def logout_view(request):
 @login_required
 def profile_view(request):
     profile = request.user.profile
+    posts = Post.objects.filter(author=request.user).order_by('-created_at')
+    posts_count = posts.count()
+    active_course = (
+        Course.objects
+        .filter(members=profile)
+        .annotate(post_count=Count('posts'))
+        .order_by('-post_count')
+        .first()
+    )
+    
     return render(request, 'profile.html', {
         'profile': profile,
         'joined_courses': profile.joined_courses.all(),
+        'posts': posts,
+        'posts_count': posts_count,
+        'active_course': active_course,
     })
 
 
@@ -79,7 +94,19 @@ def edit_profile(request):
 
 @login_required
 def course_list(request):
-    disciplines = Discipline.objects.prefetch_related('course_set').all()
+    disciplines = Discipline.objects.prefetch_related(
+        'course_set',
+        'course_set__members',
+        'course_set__posts',
+        'course_set__posts__likes',
+        'course_set__posts__comments'
+    ).all()
+    
+    for discipline in disciplines:
+        for course in discipline.course_set.all():
+            course.total_likes = sum(post.likes.count() for post in course.posts.all())
+            course.total_comments = sum(post.comments.count() for post in course.posts.all())
+    
     return render(request, 'course_list.html', {'disciplines': disciplines})
 
 
@@ -158,10 +185,13 @@ def post_detail(request, slug):
     content_text = post.content or ""
     is_short_content = bool(content_text.strip()) and len(content_text) <= TEXT_EXPLAIN_THRESHOLD
 
+    comments = post.comments.all().order_by('-created_at')  # Most recent first
+
     return render(request, 'post_detail.html', {
         'post': post,
         'comment_form': comment_form,
         'is_short_content': is_short_content,
+        'comments': comments,
     })
 
 
@@ -177,28 +207,25 @@ def add_comment(request, post_id):
             comment.user = user
             comment.post = post
             comment.save()
+            
+            # Create notification if needed
             if post.author != user:
                 Notification.objects.create(
                     user=post.author,
                     from_user=user,
                     post=post,
                     comment=comment,
-                    message=f"{user.username} commented on your post “{post.title}”."
+                    message=f'{user.username} commented on your post "{post.title}"'
                 )
-        else:
-            comments = post.comments.all().order_by('created_at')
-            return render(request, '_comments_list.html', {
-                'comments': comments,
-                'user': user,
-                'form_errors': form.errors
-            })
 
-    comments = post.comments.all().order_by('created_at')
-    if request.headers.get('Hx-Request') or request.META.get('HTTP_HX_REQUEST'):
+        # Always return updated comments list, regardless of form validity
+        comments = post.comments.all().order_by('-created_at')
         return render(request, '_comments_list.html', {
             'comments': comments,
-            'user': user
+            'user': user,
+            'form': form if not form.is_valid() else CommentForm()
         })
+
     return redirect('post_detail', slug=post.slug)
 
 
@@ -241,20 +268,17 @@ def edit_comment(request, comment_id):
         form = CommentForm(request.POST, instance=comment)
         if form.is_valid():
             form.save()
-            comments = comment.post.comments.all().order_by('created_at')
-            if request.headers.get('Hx-Request') or request.META.get('HTTP_HX_REQUEST'):
-                return render(request, '_comments_list.html', {
-                    'comments': comments,
-                    'user': request.user
-                })
-            return redirect('post_detail', slug=comment.post.slug)
+        
+        # Return updated comments list
+        comments = comment.post.comments.all().order_by('-created_at')
+        return render(request, '_comments_list.html', {
+            'comments': comments,
+            'user': request.user,
+            'form': form if not form.is_valid() else CommentForm()
+        })
     else:
         form = CommentForm(instance=comment)
-    if request.headers.get('Hx-Request') or request.META.get('HTTP_HX_REQUEST'):
-        return render(request, 'comment_form.html', {
-            'form': form,
-            'comment': comment
-        })
+        
     return render(request, 'comment_form.html', {
         'form': form,
         'comment': comment
@@ -266,19 +290,19 @@ def delete_comment(request, comment_id):
     comment = get_object_or_404(Comment, id=comment_id)
     if comment.user != request.user and not request.user.is_superuser:
         raise PermissionDenied
+    
     post = comment.post
     if request.method == 'POST':
         comment.delete()
-        comments = post.comments.all().order_by('created_at')
-        if request.headers.get('Hx-Request') or request.META.get('HTTP_HX_REQUEST'):
-            return render(request, '_comments_list.html', {
-                'comments': comments,
-                'user': request.user
-            })
-        return redirect('post_detail', slug=post.slug)
-    if request.headers.get('Hx-Request') or request.META.get('HTTP_HX_REQUEST'):
-        return render(request, 'comment_confirm_delete.html', {'comment': comment})
-    return render(request, 'comment_confirm_delete.html', {'comment': comment})
+        comments = post.comments.all().order_by('-created_at')
+        return render(request, '_comments_list.html', {
+            'comments': comments,
+            'user': request.user
+        })
+        
+    return render(request, 'comment_confirm_delete.html', {
+        'comment': comment
+    })
 
 
 @login_required
@@ -311,7 +335,7 @@ def toggle_like(request, post_id):
                 user=post.author,
                 from_user=user,
                 post=post,
-                message=f"{user.username} liked your post “{post.title}”."
+                message=f'{user.username} liked your post "{post.title}"'
             )
 
     # HTMX request ise sadece like form partial
@@ -401,16 +425,26 @@ def post_explain(request, slug):
         })
     try:
         explanation = generate_explanation(text)
-    except Exception as e:
-        print("Explain API error:", e)
         return render(request, 'partials/ai_summary.html', {
-            'error': "Could not generate AI explanation right now."
+            'summary': explanation,
+            'title': 'AI Explanation',
+            'now': timezone.localtime(),
         })
-    return render(request, 'partials/ai_summary.html', {
-        'summary': explanation,
-        'title': 'AI Explanation',
-        'now': timezone.localtime(),
-    })
+    except Exception as e:
+        logger = logging.getLogger(__name__)
+        logger.error(f"AI explanation error: {str(e)}")
+        
+        error_msg = str(e)
+        if "API_TOKEN" in error_msg:
+            error_msg = "API configuration error. Please check your Hugging Face API settings."
+        elif "timeout" in error_msg.lower():
+            error_msg = "API request timed out. The server might be busy, please try again later."
+        else:
+            error_msg = "Could not generate AI explanation. Please try again later."
+        
+        return render(request, 'partials/ai_summary.html', {
+            'error': error_msg
+        })
 
 
 @login_required
@@ -419,40 +453,102 @@ def post_summary(request, slug):
     summary_type = request.GET.get('type', 'pdf')  # 'pdf' veya 'text'
 
     # Kaynak metni al
-    if summary_type == 'pdf':
-        if not post.file:
-            return render(request, 'partials/ai_summary.html', {
-                'error': "No PDF attached."
-            })
-        text = extract_text_from_pdf(post.file.path)
-    else:
-        text = (post.content or "").strip()
-        if not text:
-            return render(request, 'partials/ai_summary.html', {
-                'error': "No text content to process."
-            })
-
-    # Özet üret
-    chunks = chunk_text(text, max_chars=8000)
-    summaries = []
     try:
+        if summary_type == 'pdf':
+            if not post.file:
+                return render(request, 'partials/ai_summary.html', {
+                    'error': "No PDF attached."
+                })
+            text = extract_text_from_pdf(post.file.path)
+            if not text.strip():
+                return render(request, 'partials/ai_summary.html', {
+                    'error': "Could not extract text from PDF. The file might be empty or protected."
+                })
+        else:
+            text = (post.content or "").strip()
+            if not text:
+                return render(request, 'partials/ai_summary.html', {
+                    'error': "No text content to process."
+                })
+
+        # Özet üret
+        chunks = chunk_text(text, max_chars=8000)
+        summaries = []
+        
         for block in chunks:
-            summaries.append(generate_summary(block))
-    except Exception as e:
-        print("HuggingFace chunk error:", e)
+            try:
+                summaries.append(generate_summary(block))
+            except Exception as e:
+                logger = logging.getLogger(__name__)
+                logger.error(f"Chunk summarization error: {str(e)}")
+                return render(request, 'partials/ai_summary.html', {
+                    'error': f"Error during summarization: {str(e)}"
+                })
+
+        final_summary = "\n\n".join(summaries)
+
+        # PDF özeti ise kaydet
+        if summary_type == 'pdf':
+            post.pdf_summary = final_summary
+            post.save()
+
         return render(request, 'partials/ai_summary.html', {
-            'error': "Could not generate AI summary. Please shorten the content and try again."
+            'summary': final_summary,
+            'title': 'AI Summary',
+            'now': timezone.localtime(),
+        })
+        
+    except Exception as e:
+        logger = logging.getLogger(__name__)
+        logger.error(f"AI summary error: {str(e)}")
+        
+        error_msg = str(e)
+        if "API_TOKEN" in error_msg:
+            error_msg = "API configuration error. Please check your Hugging Face API settings."
+        elif "timeout" in error_msg.lower():
+            error_msg = "API request timed out. The server might be busy, please try again later."
+        elif "extract_text" in error_msg:
+            error_msg = "Could not extract text from PDF. The file might be corrupted or password protected."
+        else:
+            error_msg = "Could not generate AI summary. Please try again later."
+            
+        return render(request, 'partials/ai_summary.html', {
+            'error': error_msg
         })
 
-    final_summary = "\n\n".join(summaries)
 
-    # PDF özeti ise kaydet
-    if summary_type == 'pdf':
-        post.pdf_summary = final_summary
-        post.save()
+@login_required
+def change_username(request):
+    if request.method == 'POST':
+        new_username = request.POST.get('new_username')
+        current_password = request.POST.get('current_password')
+        
+        # Validate current password
+        if not request.user.check_password(current_password):
+            messages.error(request, 'Current password is incorrect.')
+            return redirect('profile')
+            
+        # Check if username is available
+        if User.objects.filter(username=new_username).exclude(id=request.user.id).exists():
+            messages.error(request, 'This username is already taken.')
+            return redirect('profile')
+            
+        try:
+            # Update username
+            request.user.username = new_username
+            request.user.save()
+            messages.success(request, 'Username updated successfully!')
+        except Exception as e:
+            messages.error(request, 'An error occurred while updating username.')
+            
+    return redirect('profile')
 
-    return render(request, 'partials/ai_summary.html', {
-        'summary': final_summary,
-        'title': 'AI Summary',
-        'now': timezone.localtime(),
-    })
+
+def subscribe_newsletter(request):
+    if request.method == 'POST':
+        form = NewsletterForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            messages.success(request, f'Thank you for subscribing! We will keep you updated.')
+            return redirect(request.META.get('HTTP_REFERER', 'home'))
+    return redirect('home')

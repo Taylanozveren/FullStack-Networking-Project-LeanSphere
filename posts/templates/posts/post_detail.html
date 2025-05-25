@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="post-detail">
+    <h1>{{ post.title }}</h1>
+    <p class="post-meta">by {{ post.author }} on {{ post.created_at|date:"F d, Y, P" }}</p>
+    
+    <div class="post-content">
+        {{ post.content }}
+    </div>
+
+    <button class="btn btn-primary explain-ai-btn" data-post-id="{{ post.id }}">
+        <i class="fas fa-robot"></i> Explain AI
+    </button>
+
+    <div id="explanation-{{ post.id }}" class="ai-explanation-container mt-3">
+        {% if post.ai_explanation %}
+            <div class="ai-explanation">
+                {{ post.ai_explanation|safe }}
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="post-actions mt-3">
+        <a href="{% url 'edit_post' post.id %}" class="btn btn-outline-primary">Edit Post</a>
+        <a href="{% url 'delete_post' post.id %}" class="btn btn-outline-danger">Delete Post</a>
+    </div>
+</div>
+
+<style>
+.ai-explanation-container {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 20px;
+}
+
+.ai-explanation {
+    font-size: 1.1em;
+    line-height: 1.6;
+}
+
+.explanation-text {
+    margin-bottom: 15px;
+}
+
+.explanation-meta {
+    border-top: 1px solid #dee2e6;
+    padding-top: 10px;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.badge {
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-weight: normal;
+}
+
+.loading {
+    color: #666;
+    font-style: italic;
+}
+
+.error {
+    color: #dc3545;
+    font-style: italic;
+}
+</style>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/posts.js' %}"></script>
+{% endblock %} 

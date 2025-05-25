@@ -2,110 +2,259 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="container mt-4">
-
-  <h2>{{ post.title }}</h2>
-  <p class="text-muted">
-    by {{ post.author.username }} on {{ post.created_at|date:"F j, Y, g:i a" }}
-  </p>
-
+  <!-- Course Navigation -->
   <div class="mb-3">
-    {{ post.content|linebreaks }}
+    <a href="{% url 'course_detail' post.course.slug %}" class="text-decoration-none">
+      <i class="bi bi-arrow-left"></i> Back to {{ post.course.code }}
+    </a>
   </div>
 
-  {% if post.file %}
-    <hr>
-    <p>
-      <strong>Attachment:</strong>
-      <a href="{{ post.file.url }}" download>
-        {{ post.file.name|slice:"8:" }}
-      </a>
+  <!-- Post Title & Meta -->
+  <div class="mb-4">
+    <h2>{{ post.title }}</h2>
+    <p class="text-muted d-flex align-items-center gap-3">
+      <span>
+        <img src="{{ post.author.profile.avatar.url }}" 
+             class="rounded-circle border" 
+             width="24" height="24" 
+             alt="avatar">
+        {{ post.author.username }}
+      </span>
+      <span><i class="bi bi-clock"></i> {{ post.created_at|date:"F j, Y, g:i a" }}</span>
     </p>
-  {% endif %}
+  </div>
 
-  {# ——— On-Demand AI Controls ——— #}
-  <div id="summary-controls" class="mb-3">
-    {% if post.file %}
-      <button
-        class="btn btn-sm btn-outline-secondary me-2"
-        hx-get="{% url 'post_summary' post.slug %}?type=pdf"
-        hx-target="#ai-summary-container"
-        hx-swap="innerHTML"
-        hx-indicator="#ai-loading">
-        Generate PDF Summary
-      </button>
-    {% endif %}
+  <!-- Post Content -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <div class="post-content">
+        {{ post.content|linebreaks }}
+      </div>
 
-    {% if post.content %}
-      {% if is_short_content %}
-        <button
-          class="btn btn-sm btn-outline-secondary"
-          hx-get="{% url 'post_summary' post.slug %}?type=text"
-          hx-target="#ai-summary-container"
-          hx-swap="innerHTML"
-          hx-indicator="#ai-loading">
-          Explain AI
-        </button>
-      {% else %}
-        <button
-          class="btn btn-sm btn-outline-secondary"
-          hx-get="{% url 'post_summary' post.slug %}?type=text"
-          hx-target="#ai-summary-container"
-          hx-swap="innerHTML"
-          hx-indicator="#ai-loading">
-          Generate Text Summary
-        </button>
+      {% if post.file %}
+        <hr>
+        <div class="d-flex align-items-center gap-2">
+          <span class="text-muted">Attachment:</span>
+          <a href="{{ post.file.url }}" download class="attachment-link">
+            <i class="bi bi-paperclip"></i>
+            <span>{{ post.file.name|slice:"8:" }}</span>
+          </a>
+        </div>
       {% endif %}
-    {% endif %}
-
-    <div id="ai-loading"
-         class="spinner-border text-primary ms-2 d-none"
-         role="status">
-      <span class="visually-hidden">Loading...</span>
     </div>
   </div>
 
-  {# ——— HTMX ile gelen AI partial buraya gelecek ——— #}
-  <div id="ai-summary-container" class="my-4"></div>
-
+  <!-- Author Actions -->
   {% if request.user == post.author %}
-    <hr>
-    <a href="{% url 'edit_post' post.slug %}" class="btn btn-outline-primary">Edit Post</a>
-    <a href="{% url 'delete_post' post.slug %}" class="btn btn-outline-danger ms-2">Delete Post</a>
+    <div class="mb-4">
+      <a href="{% url 'edit_post' post.slug %}" class="btn btn-outline-primary">
+        <i class="bi bi-pencil"></i> Edit Post
+      </a>
+      <a href="{% url 'delete_post' post.slug %}" class="btn btn-outline-danger ms-2">
+        <i class="bi bi-trash"></i> Delete Post
+      </a>
+    </div>
   {% endif %}
 
-  {# templates/post_detail.html içinden beğeni kısmı #}
-<hr>
+  <!-- AI Tools -->
+  <div class="mb-4">
+    <h5 class="mb-3"><i class="bi bi-robot"></i> AI Tools</h5>
+    <div class="d-flex flex-wrap gap-2">
+      {% if post.file %}
+        <button
+          id="pdf-summary-btn"
+          class="btn btn-outline-primary"
+          hx-get="{% url 'post_summary' post.slug %}?type=pdf"
+          hx-target="#ai-summary-container"
+          hx-swap="innerHTML"
+          hx-indicator="#ai-loading">
+          <i class="bi bi-file-earmark-pdf"></i> Generate PDF Summary
+        </button>
+      {% endif %}
 
-{% if user.is_authenticated %}
-  {% include 'partials/like_form.html' with post=post user=user %}
-{% else %}
-  <p class="text-muted">
-    You must <a href="{% url 'login' %}">log in</a> to like posts.
-  </p>
-{% endif %}
+      {% if post.content %}
+        {% if is_short_content %}
+          <button
+            id="explain-ai-btn"
+            class="btn btn-outline-primary"
+            hx-get="{% url 'post_explain' post.slug %}"
+            hx-target="#ai-summary-container"
+            hx-swap="innerHTML"
+            hx-indicator="#ai-loading">
+            <i class="bi bi-translate"></i> Explain AI
+          </button>
+        {% else %}
+          <button
+            id="text-summary-btn"
+            class="btn btn-outline-primary"
+            hx-get="{% url 'post_summary' post.slug %}?type=text"
+            hx-target="#ai-summary-container"
+            hx-swap="innerHTML"
+            hx-indicator="#ai-loading">
+            <i class="bi bi-text-paragraph"></i> Generate Text Summary
+          </button>
+        {% endif %}
+      {% endif %}
 
-  <hr>
-
-  {# --- Comments --- #}
-  <h4>Comments</h4>
-  <div id="comments-section">
-    {% include '_comments_list.html' with comments=post.comments.all user=user %}
+      <div id="ai-loading" 
+           class="spinner-border spinner-border-sm text-primary" 
+           role="status" 
+           style="display: none;">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
   </div>
-  {% if user.is_authenticated %}
-    <form id="comment-form"
-          hx-post="{% url 'add_comment' post.id %}"
-          hx-target="#comments-section"
-          hx-swap="outerHTML"
-          class="mb-3">
-      {% csrf_token %}
-      {{ comment_form.as_p }}
-      <button type="submit" class="btn btn-primary">Add Comment</button>
-    </form>
-  {% else %}
-    <p class="text-muted">
-      You must <a href="{% url 'login' %}">log in</a> to post a comment.
-    </p>
-  {% endif %}
 
+  <!-- AI Summary Results -->
+  <div id="ai-summary-container" class="mb-4"></div>
+
+  <!-- Likes -->
+  <div class="mb-4">
+    {% if user.is_authenticated %}
+      {% include 'partials/like_form.html' with post=post user=user %}
+    {% else %}
+      <div class="alert alert-info">
+        <i class="bi bi-info-circle me-2"></i>
+        You must <a href="{% url 'login' %}">log in</a> to like posts.
+      </div>
+    {% endif %}
+  </div>
+
+  <hr class="my-4">
+
+  <!-- Comments -->
+  <div class="comments-section">
+    <h4 class="mb-4">
+      <i class="bi bi-chat-left-text"></i>
+      Comments
+      <span class="text-muted">({{ post.comments.count }})</span>
+    </h4>
+    
+    <div id="comments-section">
+      {% include '_comments_list.html' with comments=comments user=user %}
+    </div>
+
+    {% if user.is_authenticated %}
+      <div class="card mt-4 comment-form-card">
+        <div class="card-body">
+          <form id="comment-form"
+                hx-post="{% url 'add_comment' post.id %}"
+                hx-target="#comments-section"
+                hx-swap="outerHTML">
+            {% csrf_token %}
+            <div class="d-flex gap-3">
+              <div class="avatar-wrapper flex-shrink-0">
+                <img src="{{ user.profile.avatar.url }}" 
+                     alt="Your avatar"
+                     class="rounded-circle"
+                     width="40" 
+                     height="40"
+                     style="object-fit: cover; border: 2px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+              </div>
+              <div class="flex-grow-1">
+                <div class="mb-3">
+                  <label for="id_content" class="form-label">Add a comment</label>
+                  <textarea name="content" 
+                          id="id_content" 
+                          class="form-control" 
+                          rows="3"
+                          placeholder="Share your thoughts..."></textarea>
+                </div>
+                <div class="text-end">
+                  <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-send"></i> Post Comment
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    {% else %}
+      <div class="alert alert-info">
+        <i class="bi bi-info-circle me-2"></i>
+        You must <a href="{% url 'login' %}">log in</a> to post a comment.
+      </div>
+    {% endif %}
+  </div>
 </div>
+
+<style>
+.post-content {
+  font-size: 1.1rem;
+  line-height: 1.7;
+}
+
+.attachment-link {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.875rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.75rem;
+  background: var(--surface-hover);
+  border-radius: 16px;
+  transition: all 0.2s ease;
+}
+
+.attachment-link:hover {
+  background: var(--primary-50);
+  color: var(--primary-700);
+}
+
+.comment-item {
+  transition: background-color 0.2s ease;
+}
+
+.comment-item:hover {
+  background-color: var(--surface-hover) !important;
+}
+
+.comment-content {
+  white-space: pre-line;
+  line-height: 1.5;
+}
+
+.comment-form-card {
+  border: none;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+.comment-form-card .card-body {
+  padding: 1.5rem;
+}
+.comment-form-card textarea {
+  border-radius: 8px;
+  resize: vertical;
+  min-height: 80px;
+}
+.comment-form-card textarea:focus {
+  box-shadow: 0 0 0 0.25rem rgba(13,110,253,.15);
+}
+</style>
+
+<script>
+  document.body.addEventListener('htmx:beforeRequest', function(evt) {
+    if (evt.detail.elt.id === 'pdf-summary-btn' || 
+        evt.detail.elt.id === 'text-summary-btn' || 
+        evt.detail.elt.id === 'explain-ai-btn') {
+      evt.detail.elt.disabled = true;
+      document.querySelector('#ai-loading').style.display = 'inline-block';
+    }
+  });
+
+  document.body.addEventListener('htmx:afterRequest', function(evt) {
+    if (evt.detail.elt.id === 'pdf-summary-btn' || 
+        evt.detail.elt.id === 'text-summary-btn' || 
+        evt.detail.elt.id === 'explain-ai-btn') {
+      evt.detail.elt.disabled = false;
+      document.querySelector('#ai-loading').style.display = 'none';
+    }
+    
+    // Reset comment form after successful submission
+    if (evt.detail.elt.id === 'comment-form' && evt.detail.successful) {
+      evt.detail.elt.reset();
+    }
+  });
+</script>
 {% endblock %}

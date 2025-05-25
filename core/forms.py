@@ -62,3 +62,11 @@ class CommentForm(forms.ModelForm):
                 'placeholder': 'Yorum yaz...'
             }),
         }
+
+class NewsletterForm(forms.Form):
+    email = forms.EmailField(
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control bg-light',
+            'placeholder': 'Enter your email address'
+        })
+    )

@@ -1,88 +1,579 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
-<div class="container py-5">
-  <div class="row justify-content-center">
-    <!-- Profile card -->
-    <div class="col-md-4 mb-4">
-      <div class="card shadow-sm text-center">
-        <div class="card-body">
-          <div class="position-relative d-inline-block">
-            <img src="{{ profile.avatar.url }}" onerror="this.src='{% static 'img/default_avatar.png' %}'"
-                 class="rounded-circle border mb-2" style="width:130px; height:130px; object-fit:cover;" alt="Avatar">
-            <a href="{% url 'edit_profile' %}" class="position-absolute bottom-0 end-0 translate-middle badge rounded-pill bg-primary"
-              style="font-size:1.1rem; cursor:pointer;" title="Change avatar">
-              <i class="bi bi-pencil-fill"></i>
-            </a>
-          </div>
-          <h4 class="mt-2 mb-1">{{ profile.user.username }}</h4>
-          <p class="mb-0 small text-muted">{{ profile.user.email }}</p>
-          {% if profile.bio %}
-            <p class="mt-3">{{ profile.bio }}</p>
-          {% else %}
-            <p class="text-muted">No bio added yet.</p>
-          {% endif %}
-          <div class="my-2">
-            {% if profile.github_url %}
-              <a href="{{ profile.github_url }}" class="btn btn-outline-dark btn-sm me-1" target="_blank" title="GitHub">
-                <i class="bi bi-github"></i>
-              </a>
-            {% endif %}
-            {% if profile.linkedin_url %}
-              <a href="{{ profile.linkedin_url }}" class="btn btn-outline-primary btn-sm" target="_blank" title="LinkedIn">
-                <i class="bi bi-linkedin"></i>
-              </a>
-            {% endif %}
-          </div>
-          {% if profile.phone_number %}
-            <span class="badge bg-light text-dark border mt-2" style="font-size:1rem;">
-              <i class="bi bi-telephone me-1"></i> Phone: {{ profile.phone_number }}
-            </span>
-          {% endif %}
-        </div>
-        <div class="card-footer bg-transparent border-0 py-2">
-          <a href="{% url 'edit_profile' %}" class="btn btn-sm btn-outline-secondary">
-            <i class="bi bi-pencil"></i> Edit Profile
+<div class="profile-wrapper py-5">
+  <div class="container px-3 px-lg-5">
+    <!-- Profile Header -->
+    <div class="profile-header">
+      <div class="d-flex flex-wrap align-items-start gap-4">
+        <div class="position-relative">
+          <img src="{{ profile.avatar.url }}" 
+               alt="{{ user.username }}'s avatar"
+               class="profile-img">
+          <a href="{% url 'edit_profile' %}" class="btn btn-edit position-absolute" style="bottom: 0; right: 0;">
+            <i class="bi bi-pencil"></i>
           </a>
         </div>
-      </div>
-      <div class="mt-3 text-center">
-        <small class="text-muted">Member since: {{ profile.user.date_joined|date:"Y-m-d" }}</small><br>
-        <small class="text-muted">Total Posts: {{ profile.user.posts.count }}</small>
+        
+        <div class="flex-grow-1">
+          <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+            <div>
+              <h2 class="mb-1">{{ user.username }}</h2>
+              <p class="text-muted mb-2">{{ user.email }}</p>
+              <span class="badge">{{ profile.role|default:"Student" }}</span>
+            </div>
+            <button type="button" 
+                    class="btn btn-edit"
+                    data-bs-toggle="modal"
+                    data-bs-target="#editUsernameModal">
+              <i class="bi bi-pencil"></i> Edit Profile
+            </button>
+          </div>
+          
+          <div class="social-links">
+            {% if profile.github_url %}
+            <a href="{{ profile.github_url }}" target="_blank" class="btn btn-github">
+              <i class="bi bi-github"></i> GitHub
+            </a>
+            {% endif %}
+            {% if profile.linkedin_url %}
+            <a href="{{ profile.linkedin_url }}" target="_blank" class="btn btn-linkedin">
+              <i class="bi bi-linkedin"></i> LinkedIn
+            </a>
+            {% endif %}
+          </div>
+
+          <div class="profile-stats mt-4">
+            <div class="stat">
+              <span class="stat-value">{{ posts_count|default:"0" }}</span>
+              <span class="stat-label">Posts</span>
+            </div>
+            <div class="stat">
+              <span class="stat-value">{{ joined_courses.count }}</span>
+              <span class="stat-label">Courses</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- Courses & Activity -->
-    <div class="col-md-6">
-      <h5 class="mb-3">Joined Courses</h5>
-      {% if joined_courses %}
-        <ul class="list-group mb-4">
-          {% for course in joined_courses %}
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-              <span>
-                <a href="{% url 'course_detail' course.slug %}" class="fw-semibold">{{ course.code }} – {{ course.title }}</a>
-              </span>
-              <span class="badge bg-primary rounded-pill">{{ course.members.count }} joined</span>
-            </li>
-          {% endfor %}
-        </ul>
-      {% else %}
-        <div class="alert alert-info">
-          You haven’t joined any courses yet. <a href="{% url 'course_list' %}">Browse Courses ➜</a>
+    <div class="row g-4">
+      <!-- Joined Courses -->
+      <div class="col-lg-6">
+        <div class="content-section h-100">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="section-title mb-0">
+              <i class="bi bi-book me-2"></i>
+              Joined Courses
+            </h2>
+            <a href="{% url 'course_list' %}" class="btn btn-primary btn-sm">
+              <i class="bi bi-plus-lg"></i> Join New Course
+            </a>
+          </div>
+          
+          {% if joined_courses %}
+            <div class="course-list scrollable-content">
+              {% for course in joined_courses %}
+                <div class="course-item">
+                  <div class="course-icon">
+                    <i class="bi bi-mortarboard"></i>
+                  </div>
+                  <div class="course-info">
+                    <h3 class="course-title">{{ course.code }}</h3>
+                    <p class="course-subtitle mb-0">{{ course.title }}</p>
+                  </div>
+                  <div class="course-meta">
+                    <span class="badge bg-primary-subtle text-primary">
+                      {{ course.posts.count }} posts
+                    </span>
+                  </div>
+                  <div class="course-actions">
+                    <a href="{% url 'course_detail' course.slug %}" class="btn btn-sm btn-primary">
+                      <i class="bi bi-arrow-right"></i>
+                    </a>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="text-center py-4">
+              <i class="bi bi-journal-x display-4 text-muted mb-3"></i>
+              <h3>No courses joined yet</h3>
+              <p class="text-muted mb-4">Start your learning journey by joining some courses!</p>
+              <a href="{% url 'course_list' %}" class="btn btn-primary">
+                <i class="bi bi-plus-lg"></i> Browse Courses
+              </a>
+            </div>
+          {% endif %}
         </div>
-      {% endif %}
-      <h6 class="mt-4">Recent Activity</h6>
-      <ul class="list-unstyled">
-        {% for post in profile.user.posts.all|slice:":3" %}
-          <li class="mb-1">
-            <a href="{% url 'post_detail' post.slug %}">{{ post.title }}</a>
-            <small class="text-muted">({{ post.created_at|date:"M d, Y" }})</small>
-          </li>
-        {% empty %}
-          <li class="text-muted">No recent posts.</li>
-        {% endfor %}
-      </ul>
+      </div>
+
+      <!-- Shared Posts -->
+      <div class="col-lg-6">
+        <div class="content-section h-100">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="section-title mb-0">
+              <i class="bi bi-file-text me-2"></i>
+              Shared Posts
+            </h2>
+            {% if joined_courses %}
+            <button type="button" class="btn btn-primary btn-sm" disabled>
+              <i class="bi bi-plus-lg"></i> New Post
+            </button>
+            {% endif %}
+          </div>
+
+          {% if posts %}
+            <div class="post-list scrollable-content">
+              {% for post in posts %}
+                <div class="post-item">
+                  <div class="post-icon">
+                    {% if post.file %}
+                      {% with file_ext=post.file.name|lower %}
+                        {% if '.pdf' in file_ext %}
+                          <i class="bi bi-file-pdf text-danger"></i>
+                        {% elif '.jpg' in file_ext or '.png' in file_ext %}
+                          <i class="bi bi-file-image text-success"></i>
+                        {% else %}
+                          <i class="bi bi-file-text text-primary"></i>
+                        {% endif %}
+                      {% endwith %}
+                    {% else %}
+                      <i class="bi bi-file-text text-primary"></i>
+                    {% endif %}
+                  </div>
+                  <div class="post-info">
+                    <h3 class="post-title">{{ post.title }}</h3>
+                    <p class="post-meta mb-0">
+                      <span class="course-badge">{{ post.course.code }}</span>
+                      <span class="text-muted">{{ post.created_at|timesince }} ago</span>
+                    </p>
+                  </div>
+                  <div class="post-stats">
+                    <span class="stat">
+                      <i class="bi bi-heart"></i> {{ post.likes.count }}
+                    </span>
+                    <span class="stat">
+                      <i class="bi bi-chat"></i> {{ post.comments.count }}
+                    </span>
+                  </div>
+                  <div class="post-actions">
+                    <a href="{% url 'post_detail' post.slug %}" class="btn btn-sm btn-primary">
+                      <i class="bi bi-arrow-right"></i>
+                    </a>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="text-center py-4">
+              <i class="bi bi-file-earmark-x display-4 text-muted mb-3"></i>
+              <h3>No posts yet</h3>
+              {% if joined_courses %}
+                <p class="text-muted mb-4">Share your first post with your classmates!</p>
+                <button type="button" class="btn btn-primary" disabled>
+                  <i class="bi bi-plus-lg"></i> Create Post
+                </button>
+                <p class="text-muted small mt-3">
+                  <i class="bi bi-info-circle"></i>
+                  You can create posts from within your joined courses
+                </p>
+              {% else %}
+                <p class="text-muted mb-4">Join some courses to start sharing posts!</p>
+                <a href="{% url 'course_list' %}" class="btn btn-primary">
+                  <i class="bi bi-plus-lg"></i> Browse Courses
+                </a>
+              {% endif %}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Course Activity -->
+      <div class="col-12">
+        <div class="content-section">
+          <h2 class="section-title mb-4">
+            <i class="bi bi-graph-up me-2"></i>
+            Course Activity
+          </h2>
+          {% if joined_courses %}
+            <div class="row g-4">
+              <div class="col-lg-8">
+                <div class="chart-container" style="position: relative; height: 300px;">
+                  <canvas id="activityChart"></canvas>
+                </div>
+              </div>
+              <div class="col-lg-4">
+                <div class="activity-stats">
+                  <div class="activity-stat-card">
+                    <div class="stat-icon bg-primary-subtle">
+                      <i class="bi bi-star"></i>
+                    </div>
+                    <div class="stat-content">
+                      <h4>Most Active Course</h4>
+                      <p>{{ active_course.title|default:"No active course" }}</p>
+                    </div>
+                  </div>
+                  <div class="activity-stat-card">
+                    <div class="stat-icon bg-success-subtle">
+                      <i class="bi bi-file-text"></i>
+                    </div>
+                    <div class="stat-content">
+                      <h4>Total Posts</h4>
+                      <p>{{ posts_count|default:"0" }} contributions</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% else %}
+            <div class="text-center py-4">
+              <i class="bi bi-bar-chart display-4 text-muted mb-3"></i>
+              <h3>No activity data</h3>
+              <p class="text-muted">Join courses to see your activity statistics.</p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
     </div>
   </div>
 </div>
+
+<!-- Edit Username Modal -->
+<div class="modal fade" id="editUsernameModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Change Username</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="post" action="{% url 'change_username' %}">
+        {% csrf_token %}
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="new_username" class="form-label">New Username</label>
+            <input type="text" 
+                   class="form-control" 
+                   id="new_username" 
+                   name="new_username" 
+                   value="{{ user.username }}"
+                   required>
+            <div class="form-text">
+              Choose a unique username. This will be visible to other users.
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="current_password" class="form-label">Current Password</label>
+            <input type="password" 
+                   class="form-control" 
+                   id="current_password" 
+                   name="current_password"
+                   required>
+            <div class="form-text">
+              Enter your current password to confirm this change.
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<style>
+.profile-wrapper {
+  background: var(--surface-ground);
+  min-height: calc(100vh - 70px);
+}
+
+.profile-header {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,.05);
+}
+
+.profile-img {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid white;
+  box-shadow: 0 2px 8px rgba(0,0,0,.1);
+}
+
+.btn-edit {
+  background: white;
+  border-radius: 50%;
+  padding: 4px;
+  box-shadow: 0 2px 4px rgba(0,0,0,.1);
+}
+
+.section-title {
+  color: var(--primary-text);
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.content-section {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,.05);
+}
+
+/* Course List Styles */
+.course-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.course-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--surface-ground);
+  border-radius: 8px;
+  transition: transform 0.2s;
+}
+
+.course-item:hover {
+  transform: translateX(4px);
+}
+
+.course-icon {
+  width: 40px;
+  height: 40px;
+  background: var(--primary-50);
+  color: var(--primary-color);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.course-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.course-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  color: var(--primary-text);
+}
+
+.course-subtitle {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.course-meta {
+  margin-right: 1rem;
+}
+
+/* Post List Styles */
+.post-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.post-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--surface-ground);
+  border-radius: 8px;
+  transition: transform 0.2s;
+}
+
+.post-item:hover {
+  transform: translateX(4px);
+}
+
+.post-icon {
+  width: 40px;
+  height: 40px;
+  background: var(--surface-card);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.post-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.post-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  color: var(--primary-text);
+}
+
+.post-meta {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.course-badge {
+  background: var(--primary-50);
+  color: var(--primary-color);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-right: 0.5rem;
+}
+
+.post-stats {
+  display: flex;
+  gap: 1rem;
+  margin-right: 1rem;
+}
+
+.post-stats .stat {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.activity-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.activity-stat-card {
+  background: var(--surface-card);
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,.05);
+}
+
+.activity-stat-card .stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.activity-stat-card .stat-content h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  color: var(--primary-text);
+}
+
+.activity-stat-card .stat-content p {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-bottom: 0;
+}
+
+.badge {
+  font-weight: 500;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+}
+
+.scrollable-content {
+  max-height: 500px;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+.scrollable-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scrollable-content::-webkit-scrollbar-track {
+  background: var(--surface-ground);
+  border-radius: 4px;
+}
+
+.scrollable-content::-webkit-scrollbar-thumb {
+  background: var(--primary-200);
+  border-radius: 4px;
+}
+
+.scrollable-content::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-300);
+}
+
+.course-list, .post-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const ctx = document.getElementById('activityChart');
+  if (ctx) {
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+        datasets: [{
+          label: 'Posts',
+          data: [4, 6, 8, 5, 10, 7],
+          borderColor: '#3B82F6',
+          tension: 0.4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: {
+              display: true,
+              drawBorder: false
+            }
+          },
+          x: {
+            grid: {
+              display: false
+            }
+          }
+        }
+      }
+    });
+  }
+});
+</script>
 {% endblock %}

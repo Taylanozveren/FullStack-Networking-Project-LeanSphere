@@ -1,87 +1,240 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="container px-3 px-lg-5 py-5">
-  <h2>Your Dashboard</h2>
-  <div class="row mt-4 g-4">
-    <!-- Total Posts -->
-    <div class="col-md-4">
-      <div class="card p-3 shadow-sm h-100">
-        <h5>Total Posts</h5>
-        <p class="fs-3 mb-0">{{ total_posts }}</p>
+<div class="dashboard-wrapper py-5">
+  <div class="container px-3 px-lg-5">
+    <div class="d-flex align-items-center justify-content-between mb-5">
+      <h2 class="mb-0">Your Dashboard</h2>
+      <a href="{% url 'course_list' %}" class="btn btn-primary">
+        <i class="bi bi-plus-lg"></i> Join New Course
+      </a>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-5">
+      <!-- Total Posts -->
+      <div class="col-md-4">
+        <div class="stat-card h-100">
+          <div class="stat-icon bg-primary-subtle">
+            <i class="bi bi-file-text"></i>
+          </div>
+          <div class="stat-content">
+            <h3 class="stat-value">{{ total_posts }}</h3>
+            <p class="stat-label mb-0">Total Posts</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top Liked Post -->
+      <div class="col-md-4">
+        <div class="stat-card h-100">
+          <div class="stat-icon bg-success-subtle">
+            <i class="bi bi-heart"></i>
+          </div>
+          <div class="stat-content">
+            {% if top_liked %}
+              <h3 class="stat-value">{{ top_liked.like_count }} likes</h3>
+              <p class="stat-label mb-0">Most Popular: "{{ top_liked.title|truncatechars:30 }}"</p>
+            {% else %}
+              <h3 class="stat-value">0</h3>
+              <p class="stat-label mb-0">No posts yet</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Most Active Course -->
+      <div class="col-md-4">
+        <div class="stat-card h-100">
+          <div class="stat-icon bg-info-subtle">
+            <i class="bi bi-book"></i>
+          </div>
+          <div class="stat-content">
+            {% if active_course %}
+              <h3 class="stat-value">{{ active_course.post_count }} posts</h3>
+              <p class="stat-label mb-0">Most Active: {{ active_course.title }}</p>
+            {% else %}
+              <h3 class="stat-value">0</h3>
+              <p class="stat-label mb-0">No courses joined</p>
+            {% endif %}
+          </div>
+        </div>
       </div>
     </div>
-    <!-- Top Liked Post -->
-    <div class="col-md-4">
-      <div class="card p-3 shadow-sm h-100">
-        <h5>Top Liked Post</h5>
-        {% if top_liked %}
-          <p class="mb-0"><strong>{{ top_liked.title }}</strong> — {{ top_liked.like_count }} like{{ top_liked.like_count|pluralize }}</p>
-        {% else %}
-          <p class="text-muted mb-0">No posts yet.</p>
-        {% endif %}
+
+    <!-- Charts Row -->
+    <div class="row g-4">
+      <!-- Posts per Course -->
+      <div class="col-lg-7">
+        <div class="content-card h-100">
+          <div class="card-header">
+            <h5 class="mb-0">
+              <i class="bi bi-pie-chart me-2"></i>
+              Posts per Course
+            </h5>
+          </div>
+          <div class="card-body">
+            <div class="chart-container" style="position: relative; height: 300px;">
+              <canvas id="postsPerCourseChart"></canvas>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-    <!-- Most Active Course -->
-    <div class="col-md-4">
-      <div class="card p-3 shadow-sm h-100">
-        <h5>Most Active Course</h5>
-        {% if active_course %}
-          <p class="mb-0"><strong>{{ active_course.title }}</strong> — {{ active_course.post_count }} post{{ active_course.post_count|pluralize }}</p>
-        {% else %}
-          <p class="text-muted mb-0">No courses joined.</p>
-        {% endif %}
+
+      <!-- Top 5 Liked Posts -->
+      <div class="col-lg-5">
+        <div class="content-card h-100">
+          <div class="card-header">
+            <h5 class="mb-0">
+              <i class="bi bi-trophy me-2"></i>
+              Top 5 Liked Posts
+            </h5>
+          </div>
+          <div class="card-body">
+            <div class="chart-container" style="position: relative; height: 300px;">
+              <canvas id="topLikedPostsChart"></canvas>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
-
-  <div class="row mt-4 g-4">
-    <!-- Posts per Course -->
-    <div class="col-md-6">
-      <div class="card p-3 shadow-sm h-100">
-        <h5>Posts per Course</h5>
-        {% if course_stats %}
-          <div class="chart-container mb-3" style="height:300px;">
-            <canvas id="donutChart"></canvas>
-          </div>
-        {% else %}
-          <p class="text-muted">No data to display.</p>
-        {% endif %}
-      </div>
-    </div>
-    <!-- Top 5 Liked Posts -->
-    <div class="col-md-6">
-      <div class="card p-3 shadow-sm h-100">
-        <h5>Top 5 Liked Posts</h5>
-        {% if top5_posts %}
-          <div class="chart-container mb-3" style="height:300px;">
-            <canvas id="barChart"></canvas>
-          </div>
-        {% else %}
-          <p class="text-muted">No data to display.</p>
-        {% endif %}
-      </div>
-    </div>
-  </div>
-
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script>
-    {% if course_stats %}
-      const donutData = {{ course_stats|safe }};
-      new Chart(document.getElementById('donutChart'), {
-        type:'doughnut',
-        data:{ labels:donutData.map(c=>c.title), datasets:[{ data:donutData.map(c=>c.post_count) }] },
-        options:{ responsive:true, maintainAspectRatio:false, plugins:{ tooltip:{ callbacks:{ label:ctx=>ctx.label+': '+ctx.formattedValue+' posts' } } } }
-      });
-    {% endif %}
-    {% if top5_posts %}
-      const barData = {{ top5_posts|safe }};
-      new Chart(document.getElementById('barChart'), {
-        type:'bar',
-        data:{ labels:barData.map(p=>p.title), datasets:[{ label:'Likes', data:barData.map(p=>p.like_count) }] },
-        options:{ responsive:true, maintainAspectRatio:false, scales:{ y:{ beginAtZero:true } } }
-      });
-    {% endif %}
-  </script>
 </div>
+
+<style>
+.dashboard-wrapper {
+  background: var(--surface-ground);
+  min-height: calc(100vh - 70px);
+}
+
+.stat-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,.05);
+  transition: transform 0.2s;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+}
+
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.stat-content {
+  flex: 1;
+}
+
+.stat-value {
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  color: var(--primary-text);
+}
+
+.stat-label {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.content-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0,0,0,.05);
+  overflow: hidden;
+}
+
+.content-card .card-header {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--surface-border);
+  background: white;
+}
+
+.content-card .card-body {
+  padding: 1.5rem;
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Posts per Course Chart
+  const courseStats = {{ course_stats|safe }};
+  new Chart(document.getElementById('postsPerCourseChart'), {
+    type: 'doughnut',
+    data: {
+      labels: courseStats.map(stat => stat.title),
+      datasets: [{
+        data: courseStats.map(stat => stat.post_count),
+        backgroundColor: [
+          '#3B82F6', // blue
+          '#F97316', // orange
+          '#10B981', // green
+          '#8B5CF6', // purple
+          '#EC4899', // pink
+          '#6366F1'  // indigo
+        ],
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'right'
+        }
+      }
+    }
+  });
+
+  // Top 5 Liked Posts Chart
+  const top5Posts = {{ top5_posts|safe }};
+  new Chart(document.getElementById('topLikedPostsChart'), {
+    type: 'bar',
+    data: {
+      labels: top5Posts.map(post => post.title),
+      datasets: [{
+        label: 'Likes',
+        data: top5Posts.map(post => post.like_count),
+        backgroundColor: '#3B82F6',
+        borderRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      indexAxis: 'y',
+      plugins: {
+        legend: {
+          display: false
+        }
+      },
+      scales: {
+        x: {
+          beginAtZero: true,
+          grid: {
+            display: false
+          }
+        },
+        y: {
+          grid: {
+            display: false
+          }
+        }
+      }
+    }
+  });
+});
+</script>
 {% endblock %}

@@ -1,24 +1,69 @@
 {# templates/partials/ai_summary.html #}
 {% if error %}
-  <div class="alert alert-warning">{{ error }}</div>
+  <div class="alert alert-warning">
+    <i class="bi bi-exclamation-triangle me-2"></i>
+    {{ error }}
+    
+    {# Cursor: Hata durumunda buton yeniden ekleniyor #}
+    <div class="mt-2">
+      <button id="retry-ai" class="btn btn-sm btn-outline-primary"
+              onclick="window.location.reload()">Retry</button>
+    </div>
+  </div>
 
 {% elif summary %}
   <div id="ai-summary-widget" class="mb-3">
-    <div id="ai-summary-content" class="card mb-2">
-      <div class="card-header">
-        <strong>{{ title }}</strong>
+    <div id="ai-summary-content" class="card mb-2 border-primary">
+      <div class="card-header bg-primary bg-opacity-10 d-flex justify-content-between align-items-center">
+        <div>
+          <i class="bi bi-robot me-2"></i>
+          <strong>{{ title }}</strong>
+        </div>
+        {# Cursor: Özetin kopyalanması ve txt olarak indirilmesi için butonlar #}
+        <div class="btn-group btn-group-sm">
+          <button id="copy-summary" class="btn btn-sm btn-outline-primary" title="Copy to clipboard">
+            <i class="bi bi-clipboard"></i>
+          </button>
+          <button id="download-summary" class="btn btn-sm btn-outline-primary" title="Download as .txt">
+            <i class="bi bi-download"></i>
+          </button>
+        </div>
       </div>
       <div class="card-body">
-        <p>{{ summary }}</p>
+        <div class="ai-response-content">
+          {{ summary|linebreaks }}
+        </div>
       </div>
-      <div class="card-footer text-muted">
-        <small>Generated at {{ now|date:"H:i:s" }}</small>
+      <div class="card-footer bg-light d-flex justify-content-between align-items-center">
+        <small class="text-muted">
+          <i class="bi bi-clock me-1"></i>Generated at {{ now|date:"H:i:s" }}
+        </small>
+        {# Cursor: Tahmini kelime sayısı #}
+        <small class="text-muted">
+          <i class="bi bi-file-text me-1"></i>~{{ summary|wordcount }} words
+        </small>
       </div>
     </div>
-    <button id="toggle-summary-btn" class="btn btn-sm btn-outline-secondary">
-      Hide {{ title }}
+    <button id="toggle-summary-btn" class="btn btn-sm btn-outline-primary">
+      <i class="bi bi-arrows-collapse"></i> Hide {{ title }}
     </button>
   </div>
+
+  <style>
+    #ai-summary-widget .card {
+      transition: all 0.3s ease;
+    }
+    #ai-summary-widget .card:hover {
+      box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+    .ai-response-content {
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+    .ai-response-content p:last-child {
+      margin-bottom: 0;
+    }
+  </style>
 
   <script>
     (function(){
@@ -27,13 +72,91 @@
       btn.addEventListener('click', () => {
         const hidden = content.style.display === 'none';
         content.style.display = hidden ? '' : 'none';
-        btn.textContent = hidden
-          ? 'Hide {{ title }}'
-          : 'Show {{ title }}';
+        
+        // Cursor: Simge ve metin değişimi
+        if (hidden) {
+          btn.innerHTML = '<i class="bi bi-arrows-collapse"></i> Hide {{ title }}';
+          btn.classList.remove('btn-primary');
+          btn.classList.add('btn-outline-primary');
+        } else {
+          btn.innerHTML = '<i class="bi bi-arrows-expand"></i> Show {{ title }}';
+          btn.classList.remove('btn-outline-primary');
+          btn.classList.add('btn-primary');
+        }
       });
+      
+      // Cursor: Kopyalama işlemi
+      const copyBtn = document.getElementById('copy-summary');
+      copyBtn.addEventListener('click', () => {
+        const summaryText = content.querySelector('.card-body').textContent.trim();
+        navigator.clipboard.writeText(summaryText).then(() => {
+          showToast('Summary copied to clipboard!', 'success');
+          copyBtn.innerHTML = '<i class="bi bi-check"></i>';
+          setTimeout(() => {
+            copyBtn.innerHTML = '<i class="bi bi-clipboard"></i>';
+          }, 2000);
+        });
+      });
+      
+      // Cursor: TXT olarak indirme işlemi
+      const downloadBtn = document.getElementById('download-summary');
+      downloadBtn.addEventListener('click', () => {
+        const summaryText = content.querySelector('.card-body').textContent.trim();
+        const blob = new Blob([summaryText], {type: 'text/plain'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = '{{ title|default:"summary" }}_{{ now|date:"Ymd_His" }}.txt';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast('Summary downloaded as TXT file', 'success');
+      });
+      
+      // Cursor: Toast gösterme yardımcı fonksiyonu
+      function showToast(message, type = 'success') {
+        // base.html'de bir toast container yoksa oluştur
+        let toastContainer = document.getElementById('toast-container');
+        if (!toastContainer) {
+          toastContainer = document.createElement('div');
+          toastContainer.id = 'toast-container';
+          toastContainer.className = 'position-fixed bottom-0 end-0 p-3';
+          document.body.appendChild(toastContainer);
+        }
+        
+        const toastId = 'toast-' + Date.now();
+        const toast = document.createElement('div');
+        toast.id = toastId;
+        toast.className = `toast align-items-center text-bg-${type} border-0`;
+        toast.setAttribute('role', 'alert');
+        toast.setAttribute('aria-live', 'assertive');
+        toast.setAttribute('aria-atomic', 'true');
+        
+        const icon = type === 'success' ? 'check-circle' : 'info-circle';
+        toast.innerHTML = `
+          <div class="d-flex">
+            <div class="toast-body">
+              <i class="bi bi-${icon} me-2"></i>${message}
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+        `;
+        
+        toastContainer.appendChild(toast);
+        const bsToast = new bootstrap.Toast(toast, {delay: 3000});
+        bsToast.show();
+        
+        // Auto-remove after animation
+        toast.addEventListener('hidden.bs.toast', () => {
+          toast.remove();
+        });
+      }
     })();
   </script>
 
 {% else %}
-  <div class="text-muted">No summary available.</div>
+  <div class="text-muted">
+    <i class="bi bi-info-circle me-2"></i>No summary available.
+  </div>
 {% endif %}

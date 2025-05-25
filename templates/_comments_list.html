@@ -1,82 +1,114 @@
 {# core/templates/_comments_list.html #}
-<div id="comments-section">
+<div class="comments-list-wrapper">
   {% for comment in comments %}
-    <div class="mb-3 p-3 border rounded position-relative bg-light d-flex" id="comment-{{ comment.id }}">
-      <img src="{{ comment.user.profile.avatar.url }}" class="rounded-circle me-3" width="40" height="40" alt="avatar">
-      <div class="flex-grow-1">
-        <strong>{{ comment.user.username }}</strong>
-        <small class="text-muted ms-2">— {{ comment.created_at|date:"M j, Y H:i" }}</small>
-        <p class="mb-1">{{ comment.content }}</p>
-        {% if user == comment.user or user.is_superuser %}
-          <div class="position-absolute top-0 end-0">
-            <!-- EDIT -->
-            <button
-              hx-get="{% url 'edit_comment' comment.id %}"
-              hx-target="#comment-{{ comment.id }}"
-              hx-swap="outerHTML"
-              class="btn btn-sm btn-outline-secondary">Edit</button>
-
-            <!-- DELETE MODAL BUTTON -->
-            <button 
-              type="button"
-              class="btn btn-sm btn-outline-danger ms-1"
-              data-bs-toggle="modal"
-              data-bs-target="#deleteCommentModal-{{ comment.id }}">
-              Delete
-            </button>
-            
-            <!-- DELETE MODAL -->
-            <div class="modal fade" id="deleteCommentModal-{{ comment.id }}" tabindex="-1" aria-labelledby="deleteModalLabel-{{ comment.id }}" aria-hidden="true">
-              <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                  <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title" id="deleteModalLabel-{{ comment.id }}">Delete Comment?</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                  </div>
-                  <div class="modal-body">
-                    <p>Are you sure you want to delete this comment?</p>
-                    <p><em>{{ comment.content|truncatechars:80 }}</em></p>
-                  </div>
-                  <div class="modal-footer">
-                    <form method="post" 
-                          hx-post="{% url 'delete_comment' comment.id %}" 
-                          hx-target="#comments-section" 
-                          hx-swap="outerHTML">
-                      {% csrf_token %}
-                      <button type="submit" class="btn btn-danger">Yes, Delete</button>
-                    </form>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                  </div>
-                </div>
-              </div>
+    <div class="comment-card mb-4 p-3 border rounded position-relative bg-light" id="comment-{{ comment.id }}">
+      <div class="d-flex">
+        <div class="avatar-wrapper me-3">
+          <img src="{{ comment.user.profile.avatar.url }}" 
+               alt="{{ comment.user.username }}'s avatar"
+               class="rounded-circle"
+               width="40" 
+               height="40"
+               style="object-fit: cover;">
+        </div>
+        <div class="flex-grow-1">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <div>
+              <strong>{{ comment.user.username }}</strong>
+              <small class="text-muted ms-2">{{ comment.created_at|date:"M j, Y H:i" }}</small>
             </div>
-            <!-- END MODAL -->
+            {% if user == comment.user or user.is_superuser %}
+              <div class="btn-group btn-group-sm">
+                <button
+                  hx-get="{% url 'edit_comment' comment.id %}"
+                  hx-target="#comment-{{ comment.id }}"
+                  hx-swap="outerHTML"
+                  class="btn btn-outline-secondary btn-sm">
+                  <i class="bi bi-pencil"></i>
+                </button>
+                <button 
+                  type="button"
+                  class="btn btn-outline-danger btn-sm"
+                  data-bs-toggle="modal"
+                  data-bs-target="#deleteCommentModal-{{ comment.id }}">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            {% endif %}
           </div>
-        {% endif %}
+          <div class="comment-content">{{ comment.content }}</div>
+        </div>
+      </div>
+      
+      <!-- DELETE MODAL -->
+      <div class="modal fade" id="deleteCommentModal-{{ comment.id }}" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+              <h5 class="modal-title">Delete Comment?</h5>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+              <p class="mb-1">Are you sure you want to delete this comment?</p>
+              <p class="text-muted mb-0"><em>{{ comment.content|truncatechars:80 }}</em></p>
+            </div>
+            <div class="modal-footer">
+              <form method="post" 
+                    hx-post="{% url 'delete_comment' comment.id %}" 
+                    hx-target="#comments-section" 
+                    hx-swap="outerHTML">
+                {% csrf_token %}
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-danger">Delete</button>
+              </form>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   {% empty %}
-    <p class="text-muted">No comments yet.</p>
+    <div class="text-center text-muted py-4">
+      <i class="bi bi-chat-left fs-2 mb-2 d-block"></i>
+      <p class="mb-0">No comments yet. Be the first to comment!</p>
+    </div>
   {% endfor %}
 </div>
 
-<!-- HTMX + Bootstrap Modal Kapanış Scripti -->
+<style>
+  .comment-card {
+    transition: background-color 0.2s ease;
+  }
+  .comment-card:hover {
+    background-color: var(--surface-hover) !important;
+  }
+  .comment-content {
+    line-height: 1.5;
+    white-space: pre-line;
+    word-break: break-word;
+  }
+  .avatar-wrapper img {
+    border: 2px solid #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  .btn-group-sm > .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+  }
+</style>
+
 <script>
   document.body.addEventListener('htmx:afterSwap', (event) => {
     if (event.detail.target.id === "comments-section") {
-      // Tüm açık modalları kapat
+      // Close all open modals
       var openModals = document.querySelectorAll('.modal.show');
       openModals.forEach(function(modalEl) {
         var modal = bootstrap.Modal.getInstance(modalEl);
         if (modal) { modal.hide(); }
       });
-      // Arkaplanı ve kilitlenmiş scroll'u kaldır
+      // Remove modal backdrop and unlock scroll
       document.body.classList.remove('modal-open');
       document.body.style.overflow = '';
-      // Varsa backdrop'u kaldır
-      document.querySelectorAll('.modal-backdrop').forEach(function(el) {
-        el.parentNode.removeChild(el);
-      });
+      document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
     }
   });
 </script>
