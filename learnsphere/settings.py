@@ -95,9 +95,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 # bizim eklediklerimiz:
-                "core.context_processors.unread_notifications",
-                "core.context_processors.recent_notifications",
-                "core.context_processors.notifications_processor",
+                "core.context_processors.notifications",
             ],
         },
     },

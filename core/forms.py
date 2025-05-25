@@ -53,15 +53,23 @@ class ProfileForm(forms.ModelForm):
         }
 
 class CommentForm(forms.ModelForm):
+    content = forms.CharField(
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'rows': 3,
+            'id': 'id_content',
+            'placeholder': 'Share your thoughts...',
+            'style': 'resize: vertical; min-height: 80px; color: #212529; background-color: #fff; border: 1px solid #ced4da;'
+        }),
+        required=True,
+        error_messages={
+            'required': 'Please enter a comment.',
+        }
+    )
+    
     class Meta:
         model = Comment
         fields = ['content']
-        widgets = {
-            'content': forms.Textarea(attrs={
-                'rows': 2,
-                'placeholder': 'Yorum yaz...'
-            }),
-        }
 
 class NewsletterForm(forms.Form):
     email = forms.EmailField(

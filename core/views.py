@@ -268,14 +268,11 @@ def edit_comment(request, comment_id):
         form = CommentForm(request.POST, instance=comment)
         if form.is_valid():
             form.save()
-        
-        # Return updated comments list
-        comments = comment.post.comments.all().order_by('-created_at')
-        return render(request, '_comments_list.html', {
-            'comments': comments,
-            'user': request.user,
-            'form': form if not form.is_valid() else CommentForm()
-        })
+            # Return the updated comment in its normal display format
+            return render(request, '_comments_list.html', {
+                'comments': [comment],  # Pass as single-item list
+                'user': request.user
+            })
     else:
         form = CommentForm(instance=comment)
         
@@ -299,10 +296,8 @@ def delete_comment(request, comment_id):
             'comments': comments,
             'user': request.user
         })
-        
-    return render(request, 'comment_confirm_delete.html', {
-        'comment': comment
-    })
+    
+    return JsonResponse({'status': 'error'}, status=400)
 
 
 @login_required
