@@ -182,47 +182,135 @@ a.btn-outline-light.learn-more:hover {
 
 /* ——— NEW: Notifications dropdown styling ——— */
 .notifications-menu {
-  border: none;
-  border-radius: 1rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  padding: 0.5rem;
+  width: 400px !important;
+  max-height: 600px !important;
+  overflow-y: auto;
+  border: none !important;
+  border-radius: 1rem !important;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15) !important;
+  padding: 1rem !important;
+  margin-top: 1rem !important;
+  right: -10px !important;
 }
 
 .notifications-menu .dropdown-item {
-  padding: 1rem;
-  border-radius: 0.5rem;
-  margin-bottom: 0.25rem;
-  transition: all 0.2s ease;
+  padding: 1rem !important;
+  border-radius: 0.75rem !important;
+  margin-bottom: 0.75rem !important;
+  white-space: normal !important;
+  transition: all 0.2s ease !important;
+  border: 1px solid transparent !important;
+  background: #fff !important;
 }
 
 .notifications-menu .dropdown-item:last-child {
-  margin-bottom: 0;
+  margin-bottom: 0 !important;
 }
 
 .notifications-menu .dropdown-item.unread {
-  background-color: rgba(var(--primary-rgb), 0.05);
+  background-color: #f0f7ff !important;
+  border-color: #e1efff !important;
+  font-weight: 500 !important;
 }
 
 .notifications-menu .dropdown-item:hover {
-  background-color: rgba(var(--primary-rgb), 0.1);
-  transform: translateX(3px);
+  background-color: #f8faff !important;
+  transform: translateX(4px);
 }
 
-/* New-dot icon spacing */
-.notifications-menu .bi-circle-fill {
-  margin-left: .5rem;
+.notifications-menu .dropdown-item p {
+  margin-bottom: 0.25rem !important;
+  line-height: 1.5 !important;
+  font-size: 0.9375rem !important;
+  color: #1a1a1a !important;
 }
 
-/* Scrollbar in notifications menu */
-.notifications-menu::-webkit-scrollbar {
-  width: 6px;
+.notifications-menu .dropdown-item small {
+  font-size: 0.8125rem !important;
+  color: #6c757d !important;
+  display: block !important;
 }
-.notifications-menu::-webkit-scrollbar-track {
-  background: transparent;
+
+.notifications-menu .dropdown-divider {
+  margin: 0.75rem 0 !important;
+  border-color: #e9ecef !important;
 }
-.notifications-menu::-webkit-scrollbar-thumb {
-  background: rgba(0, 83, 186, 0.5);
-  border-radius: 3px;
+
+.notifications-menu .dropdown-item.text-center {
+  color: #0d6efd !important;
+  font-weight: 500 !important;
+  padding: 0.75rem !important;
+}
+
+/* Empty state styling */
+.notifications-menu .empty-state {
+  padding: 2rem 1rem !important;
+  text-align: center !important;
+}
+
+.notifications-menu .empty-state i {
+  font-size: 1.75rem !important;
+  color: #6c757d !important;
+  margin-bottom: 0.75rem !important;
+}
+
+.notifications-menu .empty-state p {
+  color: #6c757d !important;
+  margin: 0 !important;
+}
+
+/* Notification badge in navbar */
+.nav-item .badge.bg-danger {
+  position: absolute !important;
+  top: -6px !important;
+  right: -6px !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  min-width: 20px !important;
+  height: 20px !important;
+  padding: 0 6px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 2px solid #fff !important;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2) !important;
+}
+
+/* Notification icon button */
+.nav-item .btn-light {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border: none !important;
+  padding: 0.625rem !important;
+  width: 44px !important;
+  height: 44px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+  transition: all 0.2s ease !important;
+  border-radius: 0.75rem !important;
+}
+
+.nav-item .btn-light:hover {
+  background: rgba(255, 255, 255, 0.25) !important;
+  transform: translateY(-2px) !important;
+}
+
+.nav-item .btn-light i {
+  font-size: 1.25rem !important;
+  color: #fff !important;
+}
+
+/* Unread indicator dot */
+.notifications-menu .badge.bg-primary {
+  width: 10px !important;
+  height: 10px !important;
+  padding: 0 !important;
+  background-color: #0d6efd !important;
+  display: inline-block !important;
+  margin-left: 0.75rem !important;
+  flex-shrink: 0 !important;
+  border-radius: 50% !important;
 }
 
 /* ——— Form Elements ——— */

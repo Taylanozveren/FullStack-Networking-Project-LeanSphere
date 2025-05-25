@@ -29,6 +29,79 @@
   {% endif %}
 
   {% block extra_css %}{% endblock %}
+
+  <style>
+    .search-input::placeholder {
+      color: #6c757d !important;
+      opacity: 0.8 !important;
+    }
+    .search-input:focus::placeholder {
+      opacity: 0.6 !important;
+    }
+    .search-input {
+      border-color: #dee2e6;
+    }
+    .search-input:focus {
+      background-color: #fff !important;
+      border-color: #86b7fe;
+      box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    .notifications-menu {
+      margin-top: 10px !important;
+      border-radius: 16px !important;
+      border: none !important;
+      overflow: hidden !important;
+    }
+
+    .notification-item {
+      padding: 12px;
+      border-radius: 12px;
+      transition: all 0.2s;
+      background: #fff;
+    }
+
+    .notification-item:hover {
+      background-color: #f8f9fa;
+      transform: translateX(4px);
+    }
+
+    .notification-item.unread {
+      background-color: #f0f7ff;
+    }
+
+    .notification-text {
+      color: #2c3e50;
+      font-size: 0.9375rem;
+      line-height: 1.4;
+    }
+
+    .unread-dot {
+      width: 8px;
+      height: 8px;
+      background-color: #0d6efd;
+      border-radius: 50%;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+
+    .notifications-list {
+      max-height: 480px;
+      overflow-y: auto;
+    }
+
+    .notifications-list::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .notifications-list::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .notifications-list::-webkit-scrollbar-thumb {
+      background-color: #dee2e6;
+      border-radius: 3px;
+    }
+  </style>
 </head>
 
 <body class="bg-light">
@@ -54,7 +127,11 @@
           {% if user.is_authenticated %}
             <form class="d-flex mx-lg-4 my-2 my-lg-0 flex-grow-1" action="{% url 'search' %}" method="get">
               <div class="input-group">
-                <input class="form-control border-end-0 bg-light" type="search" name="q" placeholder="Search posts..." required>
+                <input class="form-control border-end-0 bg-light search-input" 
+                       type="search" 
+                       name="q" 
+                       placeholder="Search posts..." 
+                       required>
                 <button class="btn btn-light border-start-0" type="submit">
                   <i class="bi bi-search"></i>
                 </button>
@@ -68,52 +145,48 @@
             {% if user.is_authenticated %}
               {# Notifications dropdown #}
               <li class="nav-item dropdown">
-                <a class="btn btn-light position-relative p-2" href="#" id="notifDropdown" 
+                <a class="btn btn-light position-relative" href="#" id="notifDropdown" 
                    data-bs-toggle="dropdown" aria-expanded="false">
                   <i class="bi bi-bell fs-5"></i>
-                  {% if unread_notifications_count %}
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                  {% if unread_notifications_count > 0 %}
+                    <span class="position-absolute badge rounded-pill bg-danger">
                       {{ unread_notifications_count }}
                     </span>
                   {% endif %}
                 </a>
-                <ul class="dropdown-menu dropdown-menu-end notifications-menu shadow-lg border-0">
-                  {% if recent_notifications %}
-                    {% for note in recent_notifications %}
-                      <li>
-                        <a href="{% url 'post_detail' note.post.slug %}"
-                           class="dropdown-item d-flex align-items-center gap-3 py-3 px-4 mark-notification {% if not note.is_read %}unread{% endif %}"
-                           data-id="{{ note.id }}">
-                          <div class="flex-shrink-0">
-                            <div class="notification-icon">
-                              <i class="bi bi-chat-dots text-primary"></i>
-                            </div>
+                <div class="dropdown-menu dropdown-menu-end notifications-menu shadow-lg p-0" style="min-width: 400px; max-width: 400px;">
+                  <div class="p-3">
+                    {% if recent_notifications %}
+                      <div class="notifications-list">
+                        {% for note in recent_notifications %}
+                          <div class="notification-item {% if not note.is_read %}unread{% endif %} mb-3">
+                            <a href="{% if note.post %}{% url 'post_detail' note.post.slug %}{% else %}#{% endif %}"
+                               class="d-flex align-items-start text-decoration-none mark-notification"
+                               data-id="{{ note.id }}">
+                              <div class="flex-grow-1">
+                                <p class="notification-text mb-1">{{ note.message }}</p>
+                                <small class="text-muted">{{ note.created_at|timesince }} ago</small>
+                              </div>
+                              {% if not note.is_read %}
+                                <span class="unread-dot ms-2 mt-2"></span>
+                              {% endif %}
+                            </a>
                           </div>
-                          <div class="flex-grow-1 min-width-0">
-                            <p class="mb-1 text-truncate">{{ note.message }}</p>
-                            <small class="text-muted">{{ note.created_at|timesince }} ago</small>
-                          </div>
-                          {% if not note.is_read %}
-                            <span class="badge bg-primary rounded-circle p-1"></span>
-                          {% endif %}
-                        </a>
-                      </li>
-                    {% endfor %}
-                  {% else %}
-                    <li>
-                      <div class="dropdown-item text-center py-4">
-                        <i class="bi bi-inbox text-muted fs-4 d-block mb-2"></i>
+                        {% endfor %}
+                      </div>
+                    {% else %}
+                      <div class="text-center py-4">
+                        <i class="bi bi-bell-slash text-muted fs-4 mb-2 d-block"></i>
                         <p class="text-muted mb-0">No new notifications</p>
                       </div>
-                    </li>
-                  {% endif %}
-                  <li><hr class="dropdown-divider my-0"></li>
-                  <li>
-                    <a class="dropdown-item text-center py-3" href="{% url 'notifications' %}">
+                    {% endif %}
+                  </div>
+                  <div class="border-top">
+                    <a href="{% url 'notifications' %}" class="d-block text-center text-primary text-decoration-none py-2 fw-medium">
                       View all notifications
                     </a>
-                  </li>
-                </ul>
+                  </div>
+                </div>
               </li>
 
               <li class="nav-item">
@@ -297,20 +370,23 @@
       document.addEventListener('DOMContentLoaded', () => {
         // Mark as Read
         document.querySelectorAll('.mark-notification').forEach(link => {
-          link.addEventListener('click', () => {
+          link.addEventListener('click', (e) => {
             const id = link.dataset.id;
+            
             fetch(`/notifications/read/${id}/`, {
               method: 'POST',
               headers: {
                 'X-CSRFToken': getCookie('csrftoken')
               }
             });
-            
+
+            // Update UI
             link.classList.remove('unread');
             const badge = link.querySelector('.badge');
             if (badge) badge.remove();
-            
-            const navBadge = document.querySelector('.navbar .badge.bg-danger');
+
+            // Update counter in navbar
+            const navBadge = document.querySelector('.nav-item .badge.bg-danger');
             if (navBadge) {
               const count = parseInt(navBadge.textContent);
               if (count > 1) {
@@ -324,18 +400,19 @@
 
         // Delete Notification
         document.querySelectorAll('.delete-notification').forEach(btn => {
-          btn.addEventListener('click', e => {
+          btn.addEventListener('click', (e) => {
             e.preventDefault();
             const id = btn.dataset.id;
+            
             fetch(`/notifications/delete/${id}/`, {
               method: 'POST',
               headers: {
                 'X-CSRFToken': getCookie('csrftoken')
               }
             }).then(() => {
-              const item = btn.closest('.notification-item');
+              const item = btn.closest('.list-group-item');
               if (item) {
-                item.classList.add('fade-out');
+                item.style.opacity = '0';
                 setTimeout(() => item.remove(), 300);
               }
             });

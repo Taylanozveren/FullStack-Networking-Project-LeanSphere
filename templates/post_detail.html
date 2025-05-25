@@ -140,7 +140,8 @@
           <form id="comment-form"
                 hx-post="{% url 'add_comment' post.id %}"
                 hx-target="#comments-section"
-                hx-swap="outerHTML">
+                hx-swap="outerHTML"
+                hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
             {% csrf_token %}
             <div class="d-flex gap-3">
               <div class="avatar-wrapper flex-shrink-0">
@@ -154,11 +155,7 @@
               <div class="flex-grow-1">
                 <div class="mb-3">
                   <label for="id_content" class="form-label">Add a comment</label>
-                  <textarea name="content" 
-                          id="id_content" 
-                          class="form-control" 
-                          rows="3"
-                          placeholder="Share your thoughts..."></textarea>
+                  {{ comment_form.content }}
                 </div>
                 <div class="text-end">
                   <button type="submit" class="btn btn-primary">
@@ -227,9 +224,14 @@
   border-radius: 8px;
   resize: vertical;
   min-height: 80px;
+  color: #212529;
+  background-color: #fff;
+  border: 1px solid #ced4da;
 }
 .comment-form-card textarea:focus {
   box-shadow: 0 0 0 0.25rem rgba(13,110,253,.15);
+  border-color: #86b7fe;
+  outline: 0;
 }
 </style>
 
