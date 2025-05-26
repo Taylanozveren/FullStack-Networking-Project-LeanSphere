@@ -277,6 +277,7 @@ h1, h2, h3, h4, h5, h6 {
 .text-gradient {
     background: linear-gradient(135deg, var(--primary-500), var(--accent-500));
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
@@ -377,3 +378,28 @@ h1, h2, h3, h4, h5, h6 {
     height: 1rem;
     border-width: 0.15em;
 } 
+
+
+/* ──────────────────────────────────────────────────── */
+/* 1) Search input içindeki yazıyı görünür kılmak */
+/* ──────────────────────────────────────────────────── */
+.navbar .form-control {
+  /* Arama kutusundaki yazı body’de tanımlı gri700 yerine daha koyu olsun */
+  color: var(--gray-900);
+}
+.navbar .form-control::placeholder {
+  /* Placeholder gri500 olsun */
+  color: var(--gray-500);
+}
+
+/* ──────────────────────────────────────────────────── */
+/* 2) text-gradient vendor warning’i gidermek      */
+/* ──────────────────────────────────────────────────── */
+.text-gradient {
+  background: linear-gradient(135deg, var(--primary-500), var(--accent-500));
+  /* Standard kuralı da ekleyelim */
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+

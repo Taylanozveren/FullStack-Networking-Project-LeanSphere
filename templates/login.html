@@ -1,16 +1,36 @@
 {% extends 'base.html' %}
 {% load socialaccount %}
 {% block content %}
+
+<style>
+  /* input içindeki yazının hep görünür olması için */
+  form input.form-control {
+    background-color: #fff !important;    /* beyaz zemin */
+    color: #212529 !important;            /* koyu metin */
+  }
+  form input.form-control::placeholder {
+    color: #6c757d !important;            /* gri placeholder */
+  }
+  form input.form-control:focus {
+    background-color: #fff !important;
+    color: #212529 !important;
+  }
+</style>
+
 <div class="row justify-content-center align-items-center min-vh-80" style="min-height: 80vh;">
   <div class="col-md-6 col-lg-5">
     <div class="card shadow-sm p-4">
       <div class="text-center mb-3">
         <h2 class="fw-bold mb-1">Welcome Back!</h2>
-        <p class="text-muted mb-3">Log in to continue to <span class="fw-bold">LearnSphere 🚀</span></p>
+        <p class="text-muted mb-3">
+          Log in to continue to <span class="fw-bold">LearnSphere 🚀</span>
+        </p>
       </div>
       <!-- Sadece Google ile Giriş Butonu -->
       <div class="mb-3 text-center">
-        <a href="{% provider_login_url 'google' %}" class="btn btn-outline-danger w-100 mb-2" style="font-weight: 500;">
+        <a href="{% provider_login_url 'google' %}"
+           class="btn btn-outline-danger w-100 mb-2"
+           style="font-weight: 500;">
           <i class="bi bi-google"></i> Continue with Google
         </a>
       </div>
@@ -23,11 +43,20 @@
         {% csrf_token %}
         <div class="mb-3">
           <label for="username" class="form-label">Username</label>
-          <input type="text" name="username" class="form-control" required autofocus>
+          <input type="text"
+                 name="username"
+                 id="username"
+                 class="form-control"
+                 required
+                 autofocus>
         </div>
         <div class="mb-3">
           <label for="password" class="form-label">Password</label>
-          <input type="password" name="password" class="form-control" required>
+          <input type="password"
+                 name="password"
+                 id="password"
+                 class="form-control"
+                 required>
         </div>
         <div class="text-center">
           <button type="submit" class="btn btn-primary w-100">

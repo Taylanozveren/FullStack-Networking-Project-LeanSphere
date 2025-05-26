@@ -20,6 +20,9 @@
             <div>
               <h2 class="mb-1">{{ user.username }}</h2>
               <p class="text-muted mb-2">{{ user.email }}</p>
+              {% if profile.bio %}
+              <p class="profile-bio mb-2">{{ profile.bio|truncatechars:160|linebreaksbr }}</p>
+              {% endif %}
               <span class="badge">{{ profile.role|default:"Student" }}</span>
             </div>
             <button type="button" 
@@ -287,6 +290,15 @@
 .profile-wrapper {
   background: var(--surface-ground);
   min-height: calc(100vh - 70px);
+}
+
+/* Profil kartı üstündeki bio metni için */
+.profile-bio {
+  font-size: .95rem;               /* Hafif küçük puntoda */
+  color: var(--text-secondary);    /* Var olan metin renginle uyumlu */
+  max-width: 600px;                /* Çok uzun metin kartı taşırmasın */
+  white-space: pre-line;           /* Satır sonlarını korur */
+  margin-bottom: 1rem;             /* Altına biraz boşluk kalsın */
 }
 
 .profile-header {

@@ -1,33 +1,131 @@
 {% extends 'base.html' %}
 {% load socialaccount %}
 {% block content %}
+
+<style>
+  /* input içindeki yazının hep görünür olması için */
+  form input.form-control {
+    background-color: #fff !important;    /* beyaz zemin */
+    color: #212529 !important;            /* koyu metin */
+  }
+  form input.form-control::placeholder {
+    color: #6c757d !important;            /* gri placeholder */
+  }
+  form input.form-control:focus {
+    background-color: #fff !important;
+    color: #212529 !important;
+  }
+</style>
+
 <div class="row justify-content-center align-items-center min-vh-80" style="min-height: 80vh;">
   <div class="col-md-6 col-lg-5">
     <div class="card shadow-sm p-4">
       <div class="text-center mb-3">
         <h2 class="fw-bold mb-1">Create Account</h2>
-        <p class="text-muted mb-3">Join the <span class="fw-bold">LearnSphere</span> community and start sharing knowledge!</p>
+        <p class="text-muted mb-3">
+          Join the <span class="fw-bold">LearnSphere</span> community and start sharing knowledge!
+        </p>
       </div>
-      <!-- Sadece Google ile Üyelik Butonu -->
+
+      <!-- Google ile devam -->
       <div class="mb-3 text-center">
-        <a href="{% provider_login_url 'google' %}" class="btn btn-outline-danger w-100 mb-2" style="font-weight: 500;">
+        <a href="{% provider_login_url 'google' %}"
+           class="btn btn-outline-danger w-100 mb-2"
+           style="font-weight: 500;">
           <i class="bi bi-google"></i> Continue with Google
         </a>
       </div>
+
       <div class="d-flex align-items-center mb-3">
         <hr class="flex-grow-1">
         <span class="mx-2 text-muted small">or</span>
         <hr class="flex-grow-1">
       </div>
+
       <form method="POST" autocomplete="on">
         {% csrf_token %}
-        {{ form.as_p }}
+
+        {# Genel form hataları #}
+        {% if form.non_field_errors %}
+          <div class="alert alert-danger">
+            {% for err in form.non_field_errors %}
+              <div>{{ err }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        {# Username #}
+        <div class="mb-3">
+          <label for="id_username" class="form-label">Username</label>
+          <input type="text"
+                 name="username"
+                 id="id_username"
+                 class="form-control{% if form.username.errors %} is-invalid{% endif %}"
+                 value="{{ form.username.value|default:'' }}"
+                 placeholder="Enter username">
+          {% for err in form.username.errors %}
+            <div class="invalid-feedback">{{ err }}</div>
+          {% endfor %}
+          <div class="form-text">
+            Letters, digits and @/./+/-/_ only.
+          </div>
+        </div>
+
+        {# Email #}
+        <div class="mb-3">
+          <label for="id_email" class="form-label">Email</label>
+          <input type="email"
+                 name="email"
+                 id="id_email"
+                 class="form-control{% if form.email.errors %} is-invalid{% endif %}"
+                 value="{{ form.email.value|default:'' }}"
+                 placeholder="you@example.com">
+          {% for err in form.email.errors %}
+            <div class="invalid-feedback">{{ err }}</div>
+          {% endfor %}
+        </div>
+
+        {# Password #}
+        <div class="mb-3">
+          <label for="id_password1" class="form-label">Password</label>
+          <input type="password"
+                 name="password1"
+                 id="id_password1"
+                 class="form-control{% if form.password1.errors %} is-invalid{% endif %}"
+                 autocomplete="new-password"
+                 placeholder="Enter password">
+          {% for err in form.password1.errors %}
+            <div class="invalid-feedback">{{ err }}</div>
+          {% endfor %}
+          <div class="form-text">
+            At least 8 characters; cannot be entirely numeric.
+          </div>
+        </div>
+
+        {# Password Confirmation #}
+        <div class="mb-4">
+          <label for="id_password2" class="form-label">Confirm Password</label>
+          <input type="password"
+                 name="password2"
+                 id="id_password2"
+                 class="form-control{% if form.password2.errors %} is-invalid{% endif %}"
+                 autocomplete="new-password"
+                 placeholder="Re-enter password">
+          {% for err in form.password2.errors %}
+            <div class="invalid-feedback">{{ err }}</div>
+          {% endfor %}
+          <div class="form-text">
+            Enter the same password as above, for verification.
+          </div>
+        </div>
+
         <div class="text-center">
           <button type="submit" class="btn btn-success w-100">
             <i class="bi bi-person-plus"></i> Sign Up
           </button>
         </div>
       </form>
+
       <div class="text-center mt-3">
         <small>
           Already have an account?

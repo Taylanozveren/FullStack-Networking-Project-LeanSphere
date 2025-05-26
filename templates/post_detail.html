@@ -124,11 +124,12 @@
 
   <!-- Comments -->
   <div class="comments-section">
-    <h4 class="mb-4">
+  <h4 id="comments-header" class="mb-4">
       <i class="bi bi-chat-left-text"></i>
       Comments
-      <span class="text-muted">({{ post.comments.count }})</span>
-    </h4>
+      <span id="comments-count" class="text-muted">({{ post.comments.count }})</span>
+  </h4>
+
     
     <div id="comments-section">
       {% include '_comments_list.html' with comments=comments user=user %}
@@ -140,7 +141,7 @@
           <form id="comment-form"
                 hx-post="{% url 'add_comment' post.id %}"
                 hx-target="#comments-section"
-                hx-swap="outerHTML"
+                +  hx-swap="innerHTML"
                 hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
             {% csrf_token %}
             <div class="d-flex gap-3">
@@ -237,26 +238,54 @@
 
 <script>
   document.body.addEventListener('htmx:beforeRequest', function(evt) {
-    if (evt.detail.elt.id === 'pdf-summary-btn' || 
-        evt.detail.elt.id === 'text-summary-btn' || 
-        evt.detail.elt.id === 'explain-ai-btn') {
+    // AI butonlarına tıklanınca spinner göster ve butonu disable et
+    if (
+      evt.detail.elt.id === 'pdf-summary-btn' ||
+      evt.detail.elt.id === 'text-summary-btn' ||
+      evt.detail.elt.id === 'explain-ai-btn'
+    ) {
       evt.detail.elt.disabled = true;
       document.querySelector('#ai-loading').style.display = 'inline-block';
     }
   });
 
   document.body.addEventListener('htmx:afterRequest', function(evt) {
-    if (evt.detail.elt.id === 'pdf-summary-btn' || 
-        evt.detail.elt.id === 'text-summary-btn' || 
-        evt.detail.elt.id === 'explain-ai-btn') {
+    // AI butonları isteği tamamlandığında geri aktive et, spinner gizle
+    if (
+      evt.detail.elt.id === 'pdf-summary-btn' ||
+      evt.detail.elt.id === 'text-summary-btn' ||
+      evt.detail.elt.id === 'explain-ai-btn'
+    ) {
       evt.detail.elt.disabled = false;
       document.querySelector('#ai-loading').style.display = 'none';
     }
-    
-    // Reset comment form after successful submission
+
+    // 1) Yorum ekleme sonrası formu temizle ve sayacı 1 artır
     if (evt.detail.elt.id === 'comment-form' && evt.detail.successful) {
       evt.detail.elt.reset();
+      const countEl = document.getElementById('comments-count');
+      if (countEl) {
+        let current = parseInt(countEl.textContent.replace(/\D/g, ''), 10) || 0;
+        countEl.textContent = `(${current + 1})`;
+      }
+    }
+
+    // 2) Yorum silme sonrası sayacı 1 azalt
+    //    swap hedefi .comments-list-wrapper olduğunda silme işlemidir
+    if (
+      evt.detail.target &&
+      evt.detail.target.matches('.comments-list-wrapper') &&
+      evt.detail.successful
+    ) {
+      const countEl = document.getElementById('comments-count');
+      if (countEl) {
+        let current = parseInt(countEl.textContent.replace(/\D/g, ''), 10) || 0;
+        const updated = Math.max(current - 1, 0);
+        countEl.textContent = `(${updated})`;
+      }
     }
   });
 </script>
+
+
 {% endblock %}

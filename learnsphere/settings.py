@@ -11,13 +11,13 @@ import environ
 # ----------------- ENV CONFIG -----------------
 BASE_DIR = Path(__file__).resolve().parent.parent
 env = environ.Env()
-environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 
 # -------------- SECRET & DEBUG FROM ENV ----------------
-SECRET_KEY = env('DJANGO_SECRET_KEY', default="insecure-key-for-dev")
-DEBUG = env.bool('DEBUG', default=True)
+SECRET_KEY = env("DJANGO_SECRET_KEY", default="insecure-key-for-dev")
+DEBUG = env.bool("DEBUG", default=True)
 
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1'])
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost", "127.0.0.1"])
 
 # ----------------- APPLICATIONS -----------------
 INSTALLED_APPS = [
@@ -27,7 +27,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    'django.contrib.sites',  # social login için şart!
+    "django.contrib.sites",  # social login için şart!
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
@@ -39,34 +39,34 @@ INSTALLED_APPS = [
 SITE_ID = 1
 
 AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
-    'allauth.account.auth_backends.AuthenticationBackend',
+    "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
 ]
 
-LOGIN_REDIRECT_URL = '/'
-ACCOUNT_LOGOUT_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = "/"
+ACCOUNT_LOGOUT_REDIRECT_URL = "/"
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_EMAIL_VERIFICATION = "optional"
 ACCOUNT_USERNAME_REQUIRED = True
 
 # ----------------- SOCIAL LOGIN: GOOGLE & GITHUB -----------------
 SOCIALACCOUNT_PROVIDERS = {
-    'google': {
-        'SCOPE': ['profile', 'email'],
-        'AUTH_PARAMS': {'access_type': 'online'},
-        'APP': {
-            'client_id': env('GOOGLE_CLIENT_ID', default=''),
-            'secret': env('GOOGLE_CLIENT_SECRET', default=''),
-            'key': ''
-        }
+    "google": {
+        "SCOPE": ["profile", "email"],
+        "AUTH_PARAMS": {"access_type": "online"},
+        "APP": {
+            "client_id": env("GOOGLE_CLIENT_ID", default=""),
+            "secret": env("GOOGLE_CLIENT_SECRET", default=""),
+            "key": "",
+        },
     },
-    'github': {
-        'SCOPE': ['user', 'email'],
-        'APP': {
-            'client_id': env('GITHUB_CLIENT_ID', default=''),
-            'secret': env('GITHUB_CLIENT_SECRET', default=''),
-            'key': ''
-        }
+    "github": {
+        "SCOPE": ["user", "email"],
+        "APP": {
+            "client_id": env("GITHUB_CLIENT_ID", default=""),
+            "secret": env("GITHUB_CLIENT_SECRET", default=""),
+            "key": "",
+        },
     },
 }
 
@@ -87,7 +87,7 @@ ROOT_URLCONF = "learnsphere.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [os.path.join(BASE_DIR, 'templates')],
+        "DIRS": [os.path.join(BASE_DIR, "templates")],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -113,7 +113,9 @@ DATABASES = {
 
 # ----------------- PASSWORD VALIDATION -----------------
 AUTH_PASSWORD_VALIDATORS = [
-    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
+    },
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
@@ -126,22 +128,22 @@ USE_I18N = True
 USE_TZ = True
 
 # ----------------- STATIC / MEDIA -----------------
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_URL = "/static/"
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
 
 # ----------------- DEFAULT PK FIELD -----------------
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # ---- File upload limits ----
-DATA_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024     
-FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024   
+DATA_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024
+FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024
 
 SOCIALACCOUNT_LOGIN_ON_GET = True
-  
+
 
 # --------- (OPTIONAL) PRODUCTION-READY TODOs ---------
 # - For production, set DEBUG=False in .env
@@ -150,6 +152,6 @@ SOCIALACCOUNT_LOGIN_ON_GET = True
 # - Set up logging config if needed
 
 # -------- Hugging Face Özetleme Ayarları --------
-HF_API_TOKEN       = env('HF_API_TOKEN')
-HF_SUMMARY_API_URL = env('HF_SUMMARY_API_URL')
-HF_EXPLAIN_API_URL = env('HF_EXPLAIN_API_URL')
+HF_API_TOKEN = env("HF_API_TOKEN")
+HF_SUMMARY_API_URL = env("HF_SUMMARY_API_URL")
+HF_EXPLAIN_API_URL = env("HF_EXPLAIN_API_URL")
