@@ -73,13 +73,14 @@ SOCIALACCOUNT_PROVIDERS = {
 # ----------------- MIDDLEWARE -----------------
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",       # ← WhiteNoise middleware eklendi
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "allauth.account.middleware.AccountMiddleware",  # <-- EKLE BUNU!
+    "allauth.account.middleware.AccountMiddleware",     # social-allauth için
 ]
 
 ROOT_URLCONF = "learnsphere.urls"
@@ -130,10 +131,13 @@ USE_TZ = True
 # ----------------- STATIC / MEDIA -----------------
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
-MEDIA_URL = "/media/"
-MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
+# WhiteNoise için: statik dosyaları sıkıştır ve cache-control header ekle
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # ----------------- DEFAULT PK FIELD -----------------
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
@@ -144,14 +148,7 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024
 
 SOCIALACCOUNT_LOGIN_ON_GET = True
 
-
-# --------- (OPTIONAL) PRODUCTION-READY TODOs ---------
-# - For production, set DEBUG=False in .env
-# - Set your real ALLOWED_HOSTS in .env (example: '.onrender.com', 'yourdomain.com')
-# - Add secure session/cookie/ssl settings for deployment
-# - Set up logging config if needed
-
 # -------- Hugging Face Özetleme Ayarları --------
-HF_API_TOKEN = env("HF_API_TOKEN")
+HF_API_TOKEN       = env("HF_API_TOKEN")
 HF_SUMMARY_API_URL = env("HF_SUMMARY_API_URL")
 HF_EXPLAIN_API_URL = env("HF_EXPLAIN_API_URL")
