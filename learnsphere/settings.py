@@ -15,7 +15,7 @@ environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 
 # -------------- SECRET & DEBUG FROM ENV ----------------
 SECRET_KEY = env("DJANGO_SECRET_KEY", default="insecure-key-for-dev")
-DEBUG = env.bool("DEBUG", default=True)
+DEBUG = env.bool("DEBUG", default=False)
 
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost", "127.0.0.1"])
 
