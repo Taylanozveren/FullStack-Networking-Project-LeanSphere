@@ -1,3 +1,13 @@
+# 🎬 LearnSphere Demo Video
+
+<p align="center">
+  <a href="https://github.com/Taylanozveren/FullStack-Networking-Project-LeanSphere/raw/main/assets/learnspheredemo.mp4">
+    <img src="https://img.icons8.com/ios-filled/100/000000/play-button-circled--v1.png" alt="Watch LearnSphere Demo" width="100"/>
+  </a>
+</p>
+
+> Click the play icon above to watch a short **1-minute demo video** showing LearnSphere's core features and user experience.
+
 # LearnSphere – Modern Learning Platform
 
 A Django-based social learning platform with enhanced UI/UX and collaborative features.
