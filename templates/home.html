@@ -17,12 +17,18 @@
                 Explore courses, share knowledge & connect with peers worldwide.
             </p>
             <div class="d-flex justify-content-center gap-4 animate-up-delay-2">
-                <a href="{% url 'dashboard' %}" class="btn btn-lg btn-get-started">
+                {% if not user.is_authenticated %}
+                <a href="{% url 'login' %}" class="btn btn-lg btn-get-started">
                     <i class="bi bi-rocket-takeoff me-2"></i>Get Started
                 </a>
-                <a href="#features" class="btn btn-lg btn-learn-more">
-                    Learn More <i class="bi bi-arrow-down ms-2"></i>
+                {% else %}
+                <a href="{% url 'course_list' %}" class="btn btn-lg btn-get-started">
+                    <i class="bi bi-book me-2"></i>Explore Courses
                 </a>
+              {% endif %}
+               <a href="#features" class="btn btn-lg btn-learn-more">
+                Learn More <i class="bi bi-arrow-down ms-2"></i>
+               </a>
             </div>
             
             <!-- Floating Elements -->

@@ -55,7 +55,7 @@ def generate_summary(text: str, max_length: int = 300, min_length: int = 80) -> 
         }
 
         logger.info(f"Hugging Face API isteği gönderiliyor: {api_url[:30]}...")
-        resp = requests.post(api_url, headers=headers, json=payload, timeout=60)
+        resp = requests.post(api_url, headers=headers, json=payload, timeout=120)
         resp.raise_for_status()
         data = resp.json()
 
