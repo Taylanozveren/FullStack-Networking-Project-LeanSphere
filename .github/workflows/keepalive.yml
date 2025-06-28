@@ -1,0 +1,12 @@
+name: Keep Render App Alive
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"  # Her 15 dakikada bir çalışır
+
+jobs:
+  keep-alive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Curl to Render App
+        run: curl -s https://leansphere-prod.onrender.com/ > /dev/null || true
